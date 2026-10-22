@@ -1,0 +1,175 @@
+@model IEnumerable<MakeupInventory.Models.Producto>
+@{
+    ViewData["Title"] = "Tienda de Cosméticos & Belleza";
+    var categorias = ViewBag.Categorias as IEnumerable<MakeupInventory.Models.Categoria> ?? Enumerable.Empty<MakeupInventory.Models.Categoria>();
+    int? catSel = ViewBag.CategoriaSeleccionada as int?;
+    string? buscar = ViewBag.Buscar as string;
+    string? ordenar = ViewBag.Ordenar as string;
+}
+
+<!-- Hero Banner Maquillaje SV -->
+<div class="p-4 p-md-5 mb-4 rounded-4 text-white shadow-sm" style="background: linear-gradient(135deg, #172B4D 0%, #223f6d 60%, #E86A7A 100%);">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <span class="badge mb-2 px-3 py-2 fw-bold text-uppercase" style="background-color: #E86A7A; color: white; letter-spacing: 1px;">
+                <i class="bi bi-sparkles me-1"></i> Maquillaje SV &bull; Catálogo Oficial
+            </span>
+            <h1 class="display-5 fw-bold mb-2">Realza tu Belleza con Cosméticos Originales</h1>
+            <p class="lead my-3 opacity-90">
+                Encuentra las mejores marcas, tonos y formulaciones para tu tipo de piel. Consulta con nuestra Asesora Virtual de IA para una recomendación personalizada.
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-controller="AsesorIA" asp-action="Index" class="btn text-white fw-bold px-4 py-2 shadow-sm" style="background-color: #E86A7A;">
+                    <i class="bi bi-stars me-1"></i> Asesora Virtual IA
+                </a>
+                <a href="#catalogo" class="btn btn-outline-light px-4 py-2">
+                    <i class="bi bi-arrow-down-circle me-1"></i> Ver Productos
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-4 d-none d-lg-block text-center">
+            <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=500&q=80" 
+                 alt="Maquillaje SV" class="img-fluid rounded-circle shadow-lg border border-3 border-white" style="width: 240px; height: 240px; object-fit: cover;">
+        </div>
+    </div>
+</div>
+
+<div id="catalogo" class="container-fluid py-2">
+    <!-- Barra de Filtros y Búsqueda -->
+    <div class="card card-custom p-3 mb-4">
+        <form method="get" asp-action="Index" class="row g-2 align-items-center">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" name="buscar" value="@buscar" class="form-control border-start-0" placeholder="Buscar por producto, marca o ingrediente...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="categoriaId" class="form-select" onchange="this.form.submit()">
+                    <option value="">Todas las Categorías</option>
+                    @foreach (var c in categorias)
+                    {
+                        <option value="@c.Id" selected="@(catSel == c.Id)">@c.Nombre</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="ordenar" class="form-select" onchange="this.form.submit()">
+                    <option value="">Ordenar por defecto</option>
+                    <option value="precio_asc" selected="@(ordenar == "precio_asc")">Menor precio</option>
+                    <option value="precio_desc" selected="@(ordenar == "precio_desc")">Mayor precio</option>
+                    <option value="nombre" selected="@(ordenar == "nombre")">Nombre (A-Z)</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-1">
+                <button type="submit" class="btn btn-beauty w-100"><i class="bi bi-funnel"></i> Filtrar</button>
+                @if (!string.IsNullOrEmpty(buscar) || catSel.HasValue || !string.IsNullOrEmpty(ordenar))
+                {
+                    <a asp-action="Index" class="btn btn-outline-secondary" title="Limpiar filtros"><i class="bi bi-x-circle"></i></a>
+                }
+            </div>
+        </form>
+    </div>
+
+    <!-- Píldoras de Categorías Rápidas -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a asp-action="Index" class="btn btn-sm @(catSel == null ? "btn-dark" : "btn-outline-secondary") rounded-pill px-3">
+            Todos (@Model.Count())
+        </a>
+        @foreach (var cat in categorias)
+        {
+            <a asp-action="Index" asp-route-categoriaId="@cat.Id" 
+               class="btn btn-sm @(catSel == cat.Id ? "btn-danger" : "btn-outline-secondary") rounded-pill px-3">
+                @cat.Nombre
+            </a>
+        }
+    </div>
+
+    <!-- Listado de Productos en Cuadrícula -->
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <div class="display-1 text-muted mb-3"><i class="bi bi-inboxes"></i></div>
+            <h4>No se encontraron productos disponibles</h4>
+            <p class="text-muted">Intenta ajustando los términos de búsqueda o seleccionando otra categoría.</p>
+            <a asp-action="Index" class="btn btn-outline-beauty">Ver todo el catálogo</a>
+        </div>
+    }
+    else
+    {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 g-4">
+            @foreach (var p in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 card-custom position-relative d-flex flex-column">
+                        <!-- Badge de Categoría -->
+                        <span class="position-absolute top-0 start-0 m-2 badge bg-light text-dark border shadow-sm">
+                            @(p.Categoria?.Nombre ?? "Cosmético")
+                        </span>
+
+                        <!-- Badge de Stock -->
+                        @if (p.Stock <= 5)
+                        {
+                            <span class="position-absolute top-0 end-0 m-2 badge bg-warning text-dark shadow-sm">
+                                <i class="bi bi-exclamation-circle me-1"></i> ¡Últimas @p.Stock!
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="position-absolute top-0 end-0 m-2 badge bg-success shadow-sm">
+                                <i class="bi bi-check2"></i> En Stock (@p.Stock)
+                            </span>
+                        }
+
+                        <!-- Imagen del Producto -->
+                        <div style="height: 220px; overflow: hidden; border-top-left-radius: 16px; border-top-right-radius: 16px; background-color: #fdf2f7;" class="d-flex align-items-center justify-content-center">
+                            @if (!string.IsNullOrEmpty(p.ImagenUrl))
+                            {
+                                <img src="@p.ImagenUrl" class="card-img-top w-100 h-100" style="object-fit: cover;" alt="@p.Nombre" onerror="this.src='https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=500&q=80'">
+                            }
+                            else
+                            {
+                                <i class="bi bi-gem text-muted" style="font-size: 4rem;"></i>
+                            }
+                        </div>
+
+                        <!-- Cuerpo de la tarjeta -->
+                        <div class="card-body d-flex flex-column p-3">
+                            <div class="small text-muted mb-1 text-uppercase fw-semibold" style="letter-spacing: 0.5px;">
+                                <i class="bi bi-building me-1"></i> @(p.Proveedor ?? "Original Makeup")
+                            </div>
+                            <h5 class="card-title fw-bold text-dark mb-1 fs-6">
+                                <a asp-action="Detalle" asp-route-id="@p.Id" class="text-decoration-none text-dark">
+                                    @p.Nombre
+                                </a>
+                            </h5>
+                            <p class="card-text text-muted small flex-grow-1 mb-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                @(p.Descripcion ?? "Fórmula cosmética de alta pigmentación y fijación profesional.")
+                            </p>
+
+                            <!-- Precio y Botones -->
+                            <div class="pt-2 border-top mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted small">Precio:</span>
+                                    <span class="fs-5 fw-bold text-danger">$@p.Precio.ToString("0.00")</span>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <form asp-action="AgregarAlCarrito" method="post" class="w-100">
+                                        <input type="hidden" name="productoId" value="@p.Id" />
+                                        <input type="hidden" name="cantidad" value="1" />
+                                        <button type="submit" class="btn btn-beauty w-100 btn-sm">
+                                            <i class="bi bi-cart-plus me-1"></i> Añadir al Carrito
+                                        </button>
+                                    </form>
+                                    <a asp-action="Detalle" asp-route-id="@p.Id" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-eye me-1"></i> Ver Detalles
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

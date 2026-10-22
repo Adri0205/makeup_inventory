@@ -1,0 +1,96 @@
+@model MakeupInventory.Models.Venta
+@{
+    ViewData["Title"] = "Factura / Comprobante de Venta #" + Model.Id;
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Factura Comercial #@Model.Id</h2>
+            <p class="text-muted small mb-0">Comprobante oficial de venta e impacto en inventario.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-outline-dark">
+                <i class="bi bi-printer me-1"></i> Imprimir Factura
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Volver a Ventas
+            </a>
+        </div>
+    </div>
+
+    <div class="card card-custom p-4 p-md-5 bg-white shadow-sm" id="factura">
+        <div class="row align-items-center border-bottom pb-4 mb-4">
+            <div class="col-md-7">
+                <h3 class="brand-title text-danger mb-1">Glow &amp; Glamour Makeup Studio</h3>
+                <div class="text-muted small">Especialistas en Cosméticos, Maquillaje y Cuidado Facial</div>
+                <div class="text-muted small">San Salvador, El Salvador &bull; Tel: (503) 2234-5678</div>
+                <div class="text-muted small">NIT / Registro: 0614-250326-102-1</div>
+            </div>
+            <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                <span class="badge bg-danger fs-5 px-3 py-2 mb-2">FACTURA N° @Model.Id.ToString("D6")</span>
+                <div class="small"><strong>Fecha de Emisión:</strong> @Model.Fecha.ToString("dd/MM/yyyy HH:mm")</div>
+                <div class="small"><strong>Estado:</strong> <span class="badge bg-success">@Model.Estado</span></div>
+            </div>
+        </div>
+
+        <div class="row mb-4 small">
+            <div class="col-sm-6">
+                <h6 class="fw-bold text-uppercase text-muted border-bottom pb-1">Datos del Cliente:</h6>
+                <div><strong>Nombre:</strong> @(Model.ClienteNombre ?? "Consumidor Final")</div>
+                <div><strong>Correo:</strong> @(Model.ClienteEmail ?? "No registrado")</div>
+                <div><strong>Teléfono:</strong> @(Model.ClienteTelefono ?? "N/A")</div>
+                <div><strong>Dirección:</strong> @(Model.DireccionEntrega ?? "Venta presencial en tienda")</div>
+            </div>
+            <div class="col-sm-6 text-sm-end mt-3 mt-sm-0">
+                <h6 class="fw-bold text-uppercase text-muted border-bottom pb-1">Detalle de Operación:</h6>
+                <div><strong>Método de Pago:</strong> @Model.MetodoPago</div>
+                <div><strong>Vendedor a Cargo:</strong> @(Model.Usuario?.Nombre ?? "Portal Web Clientes")</div>
+                <div><strong>Canal:</strong> @(Model.UsuarioId.HasValue ? "Mostrador / Tienda Física" : "E-Commerce Online")</div>
+            </div>
+        </div>
+
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 60px;" class="text-center">#</th>
+                        <th>Descripción del Producto</th>
+                        <th class="text-center" style="width: 100px;">Cantidad</th>
+                        <th class="text-end" style="width: 130px;">Precio Unit.</th>
+                        <th class="text-end" style="width: 140px;">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Detalles != null && Model.Detalles.Any())
+                    {
+                        int index = 1;
+                        foreach (var item in Model.Detalles)
+                        {
+                            <tr>
+                                <td class="text-center text-muted">@index</td>
+                                <td>
+                                    <strong>@(item.Producto?.Nombre ?? "Cosmético Ref. #" + item.ProductoId)</strong>
+                                </td>
+                                <td class="text-center fw-bold">@item.Cantidad</td>
+                                <td class="text-end">$@item.PrecioUnitario.ToString("0.00")</td>
+                                <td class="text-end fw-bold">$@item.Subtotal.ToString("0.00")</td>
+                            </tr>
+                            index++;
+                        }
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="4" class="text-end border-0">Total Liquidado:</th>
+                        <th class="text-end border-0 text-danger fs-5">$@Model.Total.ToString("0.00")</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="border-top pt-3 text-center small text-muted">
+            ¡Gracias por preferir Glow &amp; Glamour! Para cambios o reclamos de cosméticos presentar este comprobante en un plazo máximo de 15 días.
+        </div>
+    </div>
+</div>

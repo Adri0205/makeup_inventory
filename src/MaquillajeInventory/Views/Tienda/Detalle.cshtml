@@ -1,0 +1,143 @@
+@model MakeupInventory.Models.Producto
+@{
+    ViewData["Title"] = Model.Nombre + " - Detalle de Producto";
+    var relacionados = ViewBag.Relacionados as IEnumerable<MakeupInventory.Models.Producto> ?? Enumerable.Empty<MakeupInventory.Models.Producto>();
+}
+
+<div class="container py-3">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="Index" class="text-decoration-none">Tienda</a></li>
+            <li class="breadcrumb-item"><a asp-action="Index" asp-route-categoriaId="@Model.CategoriaId" class="text-decoration-none">@(Model.Categoria?.Nombre ?? "Categoría")</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Nombre</li>
+        </ol>
+    </nav>
+
+    <div class="row g-5">
+        <!-- Columna Izquierda: Imagen del Producto -->
+        <div class="col-md-6">
+            <div class="card card-custom p-3 text-center" style="background: #ffffff;">
+                <div style="height: 420px; overflow: hidden; border-radius: 12px; background: #fdf2f7;" class="d-flex align-items-center justify-content-center">
+                    @if (!string.IsNullOrEmpty(Model.ImagenUrl))
+                    {
+                        <img src="@Model.ImagenUrl" class="img-fluid w-100 h-100" style="object-fit: cover;" alt="@Model.Nombre" onerror="this.src='https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=500&q=80'">
+                    }
+                    else
+                    {
+                        <i class="bi bi-gem text-muted" style="font-size: 8rem;"></i>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Detalles del Producto & Compra -->
+        <div class="col-md-6">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-danger text-white px-3 py-1">@(Model.Categoria?.Nombre ?? "Cosmético")</span>
+                <span class="text-muted small"><i class="bi bi-tag-fill me-1"></i> ID Ref: #@Model.Id</span>
+            </div>
+
+            <h1 class="display-6 fw-bold mb-2">@Model.Nombre</h1>
+
+            <div class="mb-3 text-muted">
+                <strong>Marca / Proveedor:</strong> @(Model.Proveedor ?? "Original Makeup Studio")
+            </div>
+
+            <div class="d-flex align-items-baseline gap-3 mb-4">
+                <span class="display-5 fw-bold text-danger">$@Model.Precio.ToString("0.00")</span>
+                <span class="text-muted small">IVA Incluido en el checkout</span>
+            </div>
+
+            <div class="card bg-light border-0 p-3 mb-4 rounded-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <strong class="d-block">Disponibilidad en Almacén:</strong>
+                        @if (Model.Stock > 5)
+                        {
+                            <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> @Model.Stock unidades en stock</span>
+                        }
+                        else if (Model.Stock > 0)
+                        {
+                            <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i> ¡Solo quedan @Model.Stock unidades!</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary"><i class="bi bi-x-circle me-1"></i> Agotado temporalmente</span>
+                        }
+                    </div>
+                    <div class="text-end small text-muted">
+                        <i class="bi bi-truck me-1"></i> Envío rápido nacional
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h6 class="fw-bold text-dark">Descripción &amp; Beneficios:</h6>
+                <p class="text-muted">
+                    @(Model.Descripcion ?? "Producto dermatológicamente testeado, libre de crueldad animal y elaborado con pigmentos micropulverizados para asegurar un acabado profesional y duradero.")
+                </p>
+            </div>
+
+            <!-- Formulario de Compra -->
+            @if (Model.Stock > 0)
+            {
+                <form asp-action="AgregarAlCarrito" method="post" class="card card-custom p-3 mb-4">
+                    <input type="hidden" name="productoId" value="@Model.Id" />
+                    <div class="row g-2 align-items-center">
+                        <div class="col-4">
+                            <label class="form-label small fw-bold">Cantidad:</label>
+                            <input type="number" name="cantidad" value="1" min="1" max="@Model.Stock" class="form-control text-center fw-bold" />
+                        </div>
+                        <div class="col-8">
+                            <label class="form-label small fw-bold invisible">Acción:</label>
+                            <button type="submit" class="btn btn-beauty w-100 py-2">
+                                <i class="bi bi-cart-plus-fill me-1"></i> Añadir a mi Carrito
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            }
+
+            <!-- Tips de Belleza con IA -->
+            <div class="card border-info bg-soft-info p-3 rounded-3" style="background-color: #f0f7ff;">
+                <div class="d-flex align-items-start gap-3">
+                    <i class="bi bi-stars fs-3 text-primary"></i>
+                    <div>
+                        <h6 class="fw-bold mb-1 text-primary">Recomendación de la Asesora IA:</h6>
+                        <p class="small text-muted mb-1">
+                            Aplica sobre la piel previamente hidratada y limpia. Para potenciar el tono y extender la fijación, complementa con un primer o sellador facial.
+                        </p>
+                        <a asp-controller="AsesorIA" asp-action="Index" class="small fw-bold text-decoration-none text-primary">
+                            ¿Dudas de tu tono o tipo de piel? Consulta con nuestra IA &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos Relacionados -->
+    @if (relacionados.Any())
+    {
+        <div class="mt-5 pt-4 border-top">
+            <h3 class="fw-bold mb-4 font-monospace">También podría interesarte</h3>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3">
+                @foreach (var rel in relacionados)
+                {
+                    <div class="col">
+                        <div class="card h-100 card-custom">
+                            <img src="@(rel.ImagenUrl ?? "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=400&q=80")" 
+                                 class="card-img-top" style="height: 150px; object-fit: cover;" alt="@rel.Nombre">
+                            <div class="card-body p-2 d-flex flex-column">
+                                <h6 class="card-title fw-bold small mb-1">@rel.Nombre</h6>
+                                <div class="text-danger fw-bold mb-2">$@rel.Precio.ToString("0.00")</div>
+                                <a asp-action="Detalle" asp-route-id="@rel.Id" class="btn btn-outline-beauty btn-sm mt-auto">Ver</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

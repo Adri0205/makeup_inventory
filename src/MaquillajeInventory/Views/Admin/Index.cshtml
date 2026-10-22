@@ -1,0 +1,301 @@
+@model MakeupInventory.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard - Maquillaje SV";
+}
+
+<div class="container-fluid">
+    <!-- Encabezado con Saludo y Período de Consulta (Mockup 5.1.4.b) -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: var(--color-principal);">@Model.Saludo</h2>
+            <div class="text-muted small">
+                <i class="bi bi-calendar3 me-1"></i> Período de consulta: <strong>@Model.PeriodoConsulta</strong>
+            </div>
+        </div>
+        <div class="d-flex gap-2 mt-2 mt-md-0">
+            <a asp-controller="Ventas" asp-action="Nueva" class="btn text-white fw-bold shadow-sm" style="background-color: var(--color-accion);">
+                <i class="bi bi-cart-plus me-1"></i> Registrar Venta
+            </a>
+            <a asp-controller="Productos" asp-action="Create" class="btn btn-outline-secondary">
+                <i class="bi bi-plus-lg me-1"></i> Nuevo Producto
+            </a>
+            <!-- Botón para ir a la Asesora Virtual IA -->
+            <a asp-controller="Ia" asp-action="AsesoraVirtual" class="btn btn-outline-danger shadow-sm fw-semibold">
+                <i class="bi bi-stars me-1"></i> Asesora Virtual IA
+            </a>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Resumen de Indicadores Clave (Mockup 5.1.4.b) -->
+    <div class="row g-3 mb-4">
+        <!-- 1. Ventas del Período -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card card-custom p-3 border-start border-4" style="border-left-color: var(--color-principal) !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Ventas del Período</div>
+                        <h3 class="fw-bold mb-0" style="color: var(--color-principal);">@Model.TotalVentas</h3>
+                        <small class="text-muted">Operaciones registradas</small>
+                    </div>
+                    <div class="p-3 rounded-circle text-white" style="background-color: var(--color-principal);">
+                        <i class="bi bi-bag-check fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Ingresos Totales -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card card-custom p-3 border-start border-4" style="border-left-color: var(--color-exito) !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Ingresos Totales</div>
+                        <h3 class="fw-bold mb-0" style="color: var(--color-exito);">$@Model.MontoTotalVentas.ToString("0.00")</h3>
+                        <small class="text-muted">Recaudación acumulada</small>
+                    </div>
+                    <div class="p-3 rounded-circle text-white" style="background-color: var(--color-exito);">
+                        <i class="bi bi-cash-coin fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Stock Bajo -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card card-custom p-3 border-start border-4" style="border-left-color: var(--color-error) !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Stock Bajo (&le; 5)</div>
+                        <h3 class="fw-bold mb-0" style="color: var(--color-error);">@Model.ProductosStockBajo</h3>
+                        <small class="text-muted">Productos en riesgo</small>
+                    </div>
+                    <div class="p-3 rounded-circle text-white" style="background-color: var(--color-error);">
+                        <i class="bi bi-exclamation-octagon fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Cuotas Pendientes -->
+        <div class="col-xl-3 col-sm-6">
+            <div class="card card-custom p-3 border-start border-4" style="border-left-color: var(--color-advertencia) !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Cuotas Pendientes</div>
+                        <h3 class="fw-bold mb-0" style="color: var(--color-advertencia);">@Model.CuotasPendientes</h3>
+                        <small class="text-muted">$@Model.SaldoPendienteCuotas.ToString("0.00") por cobrar</small>
+                    </div>
+                    <div class="p-3 rounded-circle text-white" style="background-color: var(--color-advertencia);">
+                        <i class="bi bi-calendar-check fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bloque de Contenido Principal (Mockup 5.1.4.b): Gráfico de Ventas + Productos Más Vendidos + Alertas Accionables -->
+    <div class="row g-4 mb-4">
+        <!-- Gráfico de Ventas (Lavanda #8B7CF6 / Azul #172B4D) -->
+        <div class="col-lg-8">
+            <div class="card card-custom p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0" style="color: var(--color-principal);">
+                        <i class="bi bi-bar-chart-line-fill me-2" style="color: var(--color-analitico);"></i> Evolución de Ventas del Negocio
+                    </h5>
+                    <span class="badge" style="background-color: #ede9fe; color: var(--color-analitico);">Histórico 2026</span>
+                </div>
+                <div style="height: 280px; position: relative;">
+                    <canvas id="ventasChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alertas Accionables (Mockup 5.1.4.b) -->
+        <div class="col-lg-4">
+            <div class="card card-custom p-4 h-100">
+                <h5 class="fw-bold mb-3 pb-2 border-bottom" style="color: var(--color-principal);">
+                    <i class="bi bi-bell-fill me-2" style="color: var(--color-accion);"></i> Alertas Accionables
+                </h5>
+
+                @if (!Model.AlertasAccionables.Any())
+                {
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-check-circle-fill fs-1 text-success d-block mb-2"></i>
+                        <span>No hay alertas urgentes pendientes de resolver.</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var alerta in Model.AlertasAccionables)
+                        {
+                            var alertBg = alerta.Tipo == "danger" ? "#fff5f5" : "#fffbeb";
+                            var alertBorder = alerta.Tipo == "danger" ? "var(--color-error)" : "var(--color-advertencia)";
+                            <div class="p-3 rounded-3" style="background-color: @alertBg; border-left: 4px solid @alertBorder;">
+                                <div class="fw-bold small text-dark mb-1">@alerta.Titulo</div>
+                                <div class="small text-muted mb-2">@alerta.Mensaje</div>
+                                <a href="@alerta.EnlaceAccion" class="btn btn-sm btn-outline-dark" style="font-size: 0.78rem;">
+                                    @alerta.TextoAccion &rarr;
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Segunda Fila: Productos Más Vendidos + Últimas Ventas -->
+    <div class="row g-4">
+        <!-- Lista de Productos Más Vendidos (Mockup 5.1.4.b) -->
+        <div class="col-lg-6">
+            <div class="card card-custom p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                    <h5 class="fw-bold mb-0" style="color: var(--color-principal);">
+                        <i class="bi bi-stars me-2" style="color: var(--color-accion);"></i> Productos con Mayor Rotación
+                    </h5>
+                    <a asp-controller="Productos" asp-action="Index" class="btn btn-sm btn-outline-secondary">Ver Catálogo</a>
+                </div>
+
+                @if (!Model.ProductosMasVendidos.Any())
+                {
+                    <div class="text-center py-4 text-muted">
+                        <span>Aún no hay suficiente historial para calcular productos top.</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th class="text-center">Unidades</th>
+                                    <th class="text-end">Recaudado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var p in Model.ProductosMasVendidos)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold" style="color: var(--color-principal);">@p.Nombre</div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge" style="background-color: #ede9fe; color: var(--color-analitico);">
+                                                @p.UnidadesVendidas unid.
+                                            </span>
+                                        </td>
+                                        <td class="text-end fw-bold" style="color: var(--color-exito);">
+                                            $@p.TotalRecaudado.ToString("0.00")
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Últimas Ventas Registradas -->
+        <div class="col-lg-6">
+            <div class="card card-custom p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                    <h5 class="fw-bold mb-0" style="color: var(--color-principal);">
+                        <i class="bi bi-clock-history me-2 text-primary"></i> Últimas Ventas Registradas
+                    </h5>
+                    <a asp-controller="Ventas" asp-action="Index" class="btn btn-sm btn-outline-secondary">Ver Todas</a>
+                </div>
+
+                @if (!Model.UltimasVentas.Any())
+                {
+                    <div class="text-center py-4 text-muted">No se registran ventas recientes.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Orden #</th>
+                                    <th>Fecha</th>
+                                    <th>Clienta</th>
+                                    <th class="text-end">Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var v in Model.UltimasVentas)
+                                {
+                                    <tr>
+                                        <td><strong>#@v.Id</strong></td>
+                                        <td>@v.Fecha.ToString("dd/MM HH:mm")</td>
+                                        <td>@(v.ClienteNombre ?? "Clienta Mostrador")</td>
+                                        <td class="text-end fw-bold" style="color: var(--color-exito);">
+                                            $@v.Total.ToString("0.00")
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    // Gráfico de Ventas con Chart.js usando la paleta de la Fase 1
+    const ctx = document.getElementById('ventasChart').getContext('2d');
+    const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.HistorialGraficoVentas.Select(x => x.Etiqueta)));
+    const data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.HistorialGraficoVentas.Select(x => x.Monto)));
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Ingresos por Ventas ($ USD)',
+                data: data,
+                borderColor: '#172B4D',
+                backgroundColor: 'rgba(139, 124, 246, 0.15)',
+                borderWidth: 3,
+                tension: 0.35,
+                fill: true,
+                pointBackgroundColor: '#E86A7A',
+                pointBorderColor: '#FFFFFF',
+                pointBorderWidth: 2,
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: { family: 'Inter', size: 12 }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) { return '$' + value; },
+                        font: { family: 'Inter' }
+                    },
+                    grid: { color: 'rgba(231, 228, 225, 0.6)' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { family: 'Inter' } }
+                }
+            }
+        }
+    });
+</script>
+}

@@ -1,0 +1,99 @@
+@model MakeupInventory.Models.Venta
+@{
+    ViewData["Title"] = "¡Pedido Confirmado con Éxito!";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card card-custom p-4 p-md-5 border-0 shadow-lg text-center mb-4">
+                <div class="mb-3">
+                    <span class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center shadow" style="width: 80px; height: 80px;">
+                        <i class="bi bi-check-lg" style="font-size: 2.8rem;"></i>
+                    </span>
+                </div>
+                <h1 class="display-6 fw-bold text-success mb-2">¡Gracias por tu compra!</h1>
+                <p class="lead text-muted mb-4">
+                    Tu orden <strong class="text-dark">#@Model.Id</strong> ha sido procesada y registrada satisfactoriamente en el sistema.
+                </p>
+
+                <!-- Ticket / Factura Digital -->
+                <div class="card bg-light border p-4 text-start rounded-4 mb-4" id="ticketImprimible">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                        <div>
+                            <h5 class="fw-bold brand-title mb-0">Glow &amp; Glamour Makeup Studio</h5>
+                            <small class="text-muted">Comprobante Digital de Compra &bull; Factura Electrónica</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success fs-6">@Model.Estado</span>
+                            <div class="small text-muted mt-1">@Model.Fecha.ToString("dd/MM/yyyy HH:mm")</div>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3 small">
+                        <div class="col-sm-6">
+                            <strong>Cliente:</strong> @Model.ClienteNombre<br>
+                            <strong>Correo:</strong> @Model.ClienteEmail<br>
+                            <strong>Teléfono:</strong> @Model.ClienteTelefono
+                        </div>
+                        <div class="col-sm-6 text-sm-end">
+                            <strong>Método de Pago:</strong> @Model.MetodoPago<br>
+                            <strong>Dirección de Entrega:</strong> @Model.DireccionEntrega<br>
+                            <strong>Orden #:</strong> @Model.Id
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered bg-white mb-2">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th class="text-center" style="width: 80px;">Cant.</th>
+                                    <th class="text-end" style="width: 100px;">Unitario</th>
+                                    <th class="text-end" style="width: 100px;">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.Detalles != null)
+                                {
+                                    foreach (var d in Model.Detalles)
+                                    {
+                                        <tr>
+                                            <td>@(d.Producto?.Nombre ?? "Cosmético Ref. #" + d.ProductoId)</td>
+                                            <td class="text-center">@d.Cantidad</td>
+                                            <td class="text-end">$@d.PrecioUnitario.ToString("0.00")</td>
+                                            <td class="text-end fw-bold">$@d.Subtotal.ToString("0.00")</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="3" class="text-end">Total Cancelado (con IVA):</th>
+                                    <th class="text-end text-danger fs-6">$@Model.Total.ToString("0.00")</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <div class="text-center text-muted small mt-2">
+                        <i class="bi bi-qr-code me-1"></i> Comprobante verificado con Entity Framework Core &amp; Base de Datos SQL Server
+                    </div>
+                </div>
+
+                <!-- Botones de Acción -->
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <button onclick="window.print()" class="btn btn-outline-dark">
+                        <i class="bi bi-printer me-1"></i> Imprimir Comprobante
+                    </button>
+                    <a asp-action="MisPedidos" asp-route-email="@Model.ClienteEmail" class="btn btn-beauty">
+                        <i class="bi bi-box-seam me-1"></i> Rastrear Mis Pedidos
+                    </a>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-shop me-1"></i> Seguir Comprando
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

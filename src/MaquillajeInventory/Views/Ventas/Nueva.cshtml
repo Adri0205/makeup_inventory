@@ -1,0 +1,213 @@
+@model MakeupInventory.Models.NuevaVentaPOSViewModel
+@{
+    ViewData["Title"] = "Registro de Venta - Maquillaje SV";
+    var productos = ViewBag.Productos as IEnumerable<MakeupInventory.Models.Producto> ?? Enumerable.Empty<MakeupInventory.Models.Producto>();
+}
+
+<div class="container-fluid py-3">
+    <!-- Encabezado del Módulo de Registro de Venta (Mockup 5.1.4.e) -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <span class="badge px-3 py-1 fw-bold text-uppercase small mb-1" style="background-color: #e0e7ff; color: #4338ca;">
+                <i class="bi bi-cart3 me-1"></i> Módulo de Ventas
+            </span>
+            <h2 class="fw-bold mb-0" style="color: var(--color-principal);">Registro de Venta</h2>
+            <p class="text-muted small mb-0">Selecciona productos, valida existencias y define la modalidad de pago o cuotas.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Historial de Ventas
+        </a>
+    </div>
+
+    <form asp-action="Nueva" method="post" id="formVenta">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+        <!-- Dos Áreas Principales (Mockup 5.1.4.e) -->
+        <div class="row g-4">
+            <!-- Primera Área: Catálogo de Productos y Selección (Izquierda) -->
+            <div class="col-lg-7">
+                <div class="card card-custom p-4 shadow-sm h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <h5 class="fw-bold mb-0" style="color: var(--color-principal);">
+                            <i class="bi bi-box-seam me-2" style="color: var(--color-accion);"></i> 1. Seleccionar Productos
+                        </h5>
+                        <input type="text" id="buscarPOS" class="form-control form-control-sm w-50" placeholder="Buscar cosmético..." onkeyup="filtrarProductosPOS()" />
+                    </div>
+
+                    <div class="table-responsive" style="max-height: 520px; overflow-y: auto;">
+                        <table class="table table-hover align-middle mb-0" id="tablaVentaProductos">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>Cosmético</th>
+                                    <th>Precio</th>
+                                    <th class="text-center">Stock Disp.</th>
+                                    <th style="width: 140px;">Cantidad</th>
+                                    <th class="text-end" style="width: 110px;">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{ int idx = 0; }
+                                @foreach (var p in productos)
+                                {
+                                    <tr>
+                                        <td>
+                                            <input type="hidden" name="Items[@idx].ProductoId" value="@p.Id" />
+                                            <div class="fw-bold" style="color: var(--color-principal);">@p.Nombre</div>
+                                            <small class="text-muted">@(p.Categoria?.Nombre ?? "Cosmético") &bull; @(p.Proveedor ?? "Original")</small>
+                                        </td>
+                                        <td class="fw-semibold">
+                                            $<span class="precio-unit" data-precio="@p.Precio">@p.Precio.ToString("0.00")</span>
+                                        </td>
+                                        <td class="text-center">
+                                            @if (p.Stock <= 5)
+                                            {
+                                                <span class="badge bg-warning text-dark">@p.Stock</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-success">@p.Stock</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <input type="number" name="Items[@idx].Cantidad" value="0" min="0" max="@p.Stock"
+                                                   class="form-control form-control-sm text-center fw-bold cant-input"
+                                                   data-precio="@p.Precio" oninput="calcularTotalVenta()" />
+                                        </td>
+                                        <td class="text-end fw-bold subtotal-celda" style="color: var(--color-principal);">$0.00</td>
+                                    </tr>
+                                    idx++;
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Segunda Área: Detalle de Venta, Totales y Modalidad de Pago (Derecha) -->
+            <div class="col-lg-5">
+                <div class="card card-custom p-4 shadow-sm sticky-top" style="top: 80px;">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2" style="color: var(--color-principal);">
+                        <i class="bi bi-receipt-cutoff me-2" style="color: var(--color-exito);"></i> 2. Detalle y Cierre de Venta
+                    </h5>
+
+                    <!-- Datos de la Clienta -->
+                    <div class="mb-3">
+                        <label asp-for="ClienteNombre" class="form-label small fw-bold">Clienta (Opcional):</label>
+                        <input asp-for="ClienteNombre" class="form-control" placeholder="Ej: Marcela Gómez (o mostrador)" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ClienteEmail" class="form-label small fw-bold">Correo / WhatsApp (Opcional):</label>
+                        <input asp-for="ClienteEmail" class="form-control" placeholder="clienta@correo.com" />
+                    </div>
+
+                    <!-- Modalidad de Pago (Mockup 5.1.4.e) -->
+                    <div class="mb-3">
+                        <label asp-for="MetodoPago" class="form-label small fw-bold">Forma de Pago *:</label>
+                        <select asp-for="MetodoPago" class="form-select" id="selectMetodoPago" onchange="verificarPagoEnCuotas()">
+                            <option value="Efectivo">Pago Inmediato - Efectivo</option>
+                            <option value="Tarjeta">Pago Inmediato - Tarjeta POS</option>
+                            <option value="Transferencia">Pago Inmediato - Transferencia / Chivo</option>
+                            <option value="Pago en Cuotas">Pago en Cuotas (Crédito Personal)</option>
+                        </select>
+                    </div>
+
+                    <!-- Campos Dinámicos para Pago en Cuotas (Mockup 5.1.4.e) -->
+                    <div id="seccionCuotasDinamica" class="p-3 border rounded-3 mb-3 d-none" style="background-color: #fdf2f3; border-color: var(--color-accion) !important;">
+                        <h6 class="fw-bold mb-2 small text-danger"><i class="bi bi-calendar-range me-1"></i> Plan de Cuotas Acordado</h6>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="small text-muted fw-bold">N° de Cuotas:</label>
+                                <select class="form-select form-select-sm" id="numCuotasInput" onchange="calcularPlanCuotas()">
+                                    <option value="2">2 Cuotas</option>
+                                    <option value="3">3 Cuotas</option>
+                                    <option value="4">4 Cuotas</option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="small text-muted fw-bold">Primera Fecha:</label>
+                                <input type="date" class="form-control form-control-sm" value="@DateTime.Now.AddDays(15).ToString("yyyy-MM-dd")" />
+                            </div>
+                            <div class="col-12 mt-2">
+                                <div class="small fw-semibold text-dark">
+                                    Monto por cuota estimado: <span id="montoPorCuota" class="fw-bold text-danger">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumen Numérico -->
+                    <div class="p-3 rounded-3 mb-4" style="background-color: var(--color-fondo); border: 1px solid var(--color-bordes);">
+                        <div class="d-flex justify-content-between mb-1 small text-muted">
+                            <span>Artículos seleccionados:</span>
+                            <span id="resumenCantTotal" class="fw-bold text-dark">0</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-baseline">
+                            <span class="fs-5 fw-bold" style="color: var(--color-principal);">Total a Pagar:</span>
+                            <span id="resumenTotalPagar" class="fs-3 fw-bold" style="color: var(--color-exito);">$0.00</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn w-100 py-3 fs-5 fw-bold text-white shadow" style="background-color: var(--color-accion);">
+                        <i class="bi bi-check2-circle me-1"></i> Confirmar Venta
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+    function calcularTotalVenta() {
+        let total = 0;
+        let cantTotal = 0;
+        const inputs = document.querySelectorAll('.cant-input');
+
+        inputs.forEach(inp => {
+            const cant = parseInt(inp.value) || 0;
+            const precio = parseFloat(inp.dataset.precio) || 0;
+            const subtotal = cant * precio;
+
+            const tr = inp.closest('tr');
+            tr.querySelector('.subtotal-celda').innerText = '$' + subtotal.toFixed(2);
+
+            total += subtotal;
+            cantTotal += cant;
+        });
+
+        document.getElementById('resumenTotalPagar').innerText = '$' + total.toFixed(2);
+        document.getElementById('resumenCantTotal').innerText = cantTotal;
+        calcularPlanCuotas();
+    }
+
+    function verificarPagoEnCuotas() {
+        const metodo = document.getElementById('selectMetodoPago').value;
+        const secCuotas = document.getElementById('seccionCuotasDinamica');
+        if (metodo === 'Pago en Cuotas') {
+            secCuotas.classList.remove('d-none');
+            calcularPlanCuotas();
+        } else {
+            secCuotas.classList.add('d-none');
+        }
+    }
+
+    function calcularPlanCuotas() {
+        const totalStr = document.getElementById('resumenTotalPagar').innerText.replace('$', '');
+        const total = parseFloat(totalStr) || 0;
+        const numCuotas = parseInt(document.getElementById('numCuotasInput').value) || 2;
+        const cuotaMonto = (total / numCuotas).toFixed(2);
+        document.getElementById('montoPorCuota').innerText = '$' + cuotaMonto;
+    }
+
+    function filtrarProductosPOS() {
+        const q = document.getElementById('buscarPOS').value.toLowerCase();
+        const filas = document.querySelectorAll('#tablaVentaProductos tbody tr');
+        filas.forEach(f => {
+            const txt = f.innerText.toLowerCase();
+            f.style.display = txt.includes(q) ? '' : 'none';
+        });
+    }
+</script>
+}

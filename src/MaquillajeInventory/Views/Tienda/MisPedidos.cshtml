@@ -1,0 +1,85 @@
+@model IEnumerable<MakeupInventory.Models.Venta>
+@{
+    ViewData["Title"] = "Mis Pedidos & Rastreos";
+    string? emailActual = ViewBag.Email as string;
+}
+
+<div class="container py-4">
+    <div class="card card-custom p-4 mb-4">
+        <h2 class="fw-bold mb-2"><i class="bi bi-bag-check-fill text-danger me-2"></i> Mis Pedidos y Compras</h2>
+        <p class="text-muted mb-3">Consulta el historial y estado de tus compras ingresando tu correo electrónico registrado.</p>
+
+        <form method="get" asp-action="MisPedidos" class="row g-2 align-items-center">
+            <div class="col-md-8">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-envelope text-muted"></i></span>
+                    <input type="email" name="email" value="@emailActual" required class="form-control" placeholder="Ingresa tu correo (ej: valeria.martinez@gmail.com)" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-beauty w-100">
+                    <i class="bi bi-search me-1"></i> Buscar Pedidos
+                </button>
+            </div>
+        </form>
+    </div>
+
+    @if (!string.IsNullOrEmpty(emailActual))
+    {
+        @if (!Model.Any())
+        {
+            <div class="card card-custom p-5 text-center text-muted">
+                <div class="display-3 mb-2"><i class="bi bi-inbox"></i></div>
+                <h5>No se encontraron compras asociadas a "@emailActual"</h5>
+                <p>Verifica que hayas colocado el mismo correo que utilizaste durante el checkout.</p>
+                <a asp-action="Index" class="btn btn-beauty btn-sm mx-auto">Ir a la Tienda</a>
+            </div>
+        }
+        else
+        {
+            <h4 class="fw-bold mb-3">Historial de Órdenes (@Model.Count())</h4>
+            <div class="d-flex flex-column gap-3">
+                @foreach (var v in Model)
+                {
+                    <div class="card card-custom p-4">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-2 mb-3">
+                            <div>
+                                <span class="badge bg-danger me-2">Orden #@v.Id</span>
+                                <span class="text-muted small"><i class="bi bi-calendar3 me-1"></i> @v.Fecha.ToString("dd/MM/yyyy HH:mm")</span>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-success fs-6">@v.Estado</span>
+                                <span class="fs-5 fw-bold text-danger ms-3">$@v.Total.ToString("0.00")</span>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6 small">
+                                <strong>Método de Pago:</strong> @v.MetodoPago<br />
+                                <strong>Dirección de Entrega:</strong> @(v.DireccionEntrega ?? "Retiro en Tienda / Mostrador")
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="small fw-bold text-muted text-uppercase">Productos adquiridos:</h6>
+                                <ul class="list-unstyled small mb-0">
+                                    @if (v.Detalles != null)
+                                    {
+                                        foreach (var d in v.Detalles)
+                                        {
+                                            <li>&bull; @d.Cantidad x @(d.Producto?.Nombre ?? "Cosmético #" + d.ProductoId) - $@d.Subtotal.ToString("0.00")</li>
+                                        }
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="text-end mt-3 pt-2 border-top">
+                            <a asp-action="PedidoConfirmado" asp-route-id="@v.Id" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-receipt me-1"></i> Ver Comprobante Detallado
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    }
+</div>

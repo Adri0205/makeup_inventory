@@ -1,0 +1,60 @@
+@{
+    ViewData["Title"] = "Registrar Entrada de Mercancía";
+    var productos = ViewBag.Productos as IEnumerable<MakeupInventory.Models.Producto> ?? Enumerable.Empty<MakeupInventory.Models.Producto>();
+}
+
+<div class="container py-3">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card card-custom p-4 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                    <div>
+                        <h4 class="fw-bold mb-0 text-success">
+                            <i class="bi bi-truck me-2"></i> Entrada de Stock (Reabastecimiento)
+                        </h4>
+                        <small class="text-muted">Incrementa existencias al recibir pedido de proveedores.</small>
+                    </div>
+                    <a asp-action="Movimientos" class="btn btn-outline-secondary btn-sm">Ver Kárdex</a>
+                </div>
+
+                <form asp-action="Entrada" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Seleccionar Producto:</label>
+                        <select name="productoId" required class="form-select">
+                            <option value="">-- Seleccione el cosmético a abastecer --</option>
+                            @foreach (var p in productos)
+                            {
+                                <option value="@p.Id">@p.Nombre (Stock Actual: @p.Stock | Prov: @(p.Proveedor ?? "General"))</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Cantidad de Unidades Entrantes:</label>
+                            <input type="number" name="cantidad" min="1" max="10000" required class="form-control" placeholder="Ej: 50" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Proveedor / Fabricante:</label>
+                            <input type="text" name="proveedor" class="form-control" placeholder="Ej: NYX, Maybelline, L'Oréal" />
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Motivo o N° de Guía de Envío:</label>
+                        <input type="text" name="motivo" required class="form-control" placeholder="Ej: Compra Factura #FAC-9842 Lote 2026" />
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success px-4 py-2 fw-bold">
+                            <i class="bi bi-box-arrow-in-down me-1"></i> Confirmar Entrada de Mercancía
+                        </button>
+                        <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-secondary px-4">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

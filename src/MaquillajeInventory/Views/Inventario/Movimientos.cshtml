@@ -1,0 +1,84 @@
+@model IEnumerable<MakeupInventory.Models.MovimientoInventario>
+@{
+    ViewData["Title"] = "Kárdex & Movimientos de Inventario";
+}
+
+<div class="container-fluid py-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 fw-bold text-uppercase small mb-1">
+                <i class="bi bi-arrow-left-right me-1"></i> Trazabilidad &amp; Auditoría
+            </span>
+            <h1 class="display-6 fw-bold mb-0">Kárdex de Movimientos de Inventario</h1>
+            <p class="text-muted small mb-0">Historial inmutable de entradas, compras a proveedores y salidas por venta.</p>
+        </div>
+        <div class="d-flex gap-2 mt-2 mt-md-0">
+            <a asp-action="Entrada" class="btn btn-beauty">
+                <i class="bi bi-truck me-1"></i> Nueva Entrada de Proveedor
+            </a>
+            <button onclick="window.print()" class="btn btn-outline-secondary">
+                <i class="bi bi-printer me-1"></i> Imprimir Kárdex
+            </button>
+        </div>
+    </div>
+
+    <div class="card card-custom p-3 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 80px;">ID</th>
+                        <th>Fecha &amp; Hora</th>
+                        <th>Producto</th>
+                        <th class="text-center" style="width: 140px;">Tipo / Impacto</th>
+                        <th>Motivo / Referencia</th>
+                        <th>Usuario / Responsable</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model)
+                    {
+                        <tr>
+                            <td><span class="badge bg-light text-dark border">#@m.Id</span></td>
+                            <td>
+                                <div>@m.Fecha.ToString("dd/MM/yyyy")</div>
+                                <small class="text-muted">@m.Fecha.ToString("HH:mm:ss")</small>
+                            </td>
+                            <td>
+                                <div class="fw-bold">@(m.Producto?.Nombre ?? "Producto #" + m.ProductoId)</div>
+                                <small class="text-muted">Ref. #@m.ProductoId</small>
+                            </td>
+                            <td class="text-center">
+                                @if (m.Cantidad > 0)
+                                {
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle fs-6 px-3">
+                                        <i class="bi bi-arrow-down-left me-1"></i> +@m.Cantidad Entrada
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle fs-6 px-3">
+                                        <i class="bi bi-arrow-up-right me-1"></i> @m.Cantidad Salida
+                                    </span>
+                                }
+                            </td>
+                            <td>
+                                <span class="fw-semibold">@m.Motivo</span>
+                            </td>
+                            <td>
+                                @if (m.Usuario != null)
+                                {
+                                    <span class="small"><i class="bi bi-person me-1"></i>@m.Usuario.Nombre</span>
+                                }
+                                else
+                                {
+                                    <span class="small text-muted"><i class="bi bi-robot me-1"></i>Sistema Automático</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

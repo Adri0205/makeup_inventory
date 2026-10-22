@@ -1,0 +1,226 @@
+@{
+    ViewData["Title"] = "Asesora Virtual de Maquillaje - Maquillaje SV";
+}
+
+<div class="container py-3">
+    <!-- Header Asesora IA -->
+    <div class="text-center max-w-700 mx-auto mb-4">
+        <span class="badge px-3 py-2 rounded-pill fw-bold text-uppercase mb-2" style="background-color: #ede9fe; color: var(--color-analitico);">
+            <i class="bi bi-stars me-1"></i> Inteligencia Artificial Aplicada
+        </span>
+        <h1 class="display-6 fw-bold" style="color: var(--color-principal);">Asesora Virtual &bull; Maquillaje SV</h1>
+        <p class="text-muted small">
+            Orientación cosmetológica personalizada. Analizamos tu tipo de piel, ocasión y presupuesto para recomendarte los cosméticos disponibles en tiempo real.
+        </p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Panel Izquierdo: Formulario de Preferencias & Consulta -->
+        <div class="col-lg-5">
+            <div class="card card-custom p-4 shadow-sm h-100">
+                <h5 class="fw-bold mb-3 border-bottom pb-2" style="color: var(--color-principal);">
+                    <i class="bi bi-sliders2 me-2" style="color: var(--color-accion);"></i> Preferencias de la Clienta
+                </h5>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Tipo de Piel:</label>
+                    <select id="selectTipoPiel" class="form-select">
+                        <option value="">Selecciona tipo de piel...</option>
+                        <option value="Grasa">Grasa / Con brillo</option>
+                        <option value="Seca">Seca / Deshidratada</option>
+                        <option value="Mixta">Mixta (Zona T grasa, mejillas secas)</option>
+                        <option value="Sensible">Sensible</option>
+                        <option value="Normal">Normal</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Ocasión o Evento:</label>
+                    <select id="selectOcasion" class="form-select">
+                        <option value="">Selecciona ocasión...</option>
+                        <option value="Diario">Uso diario / Trabajo / Estudio</option>
+                        <option value="Noche">Fiesta / Noche / Gala</option>
+                        <option value="Boda">Boda / Graduación</option>
+                        <option value="Casual">Casual fin de semana</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Presupuesto Máximo ($ USD):</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" id="inputPresupuesto" class="form-control" placeholder="Ej: 20.00" min="1" max="500" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">¿Qué estás buscando? (Lenguaje Natural):</label>
+                    <textarea id="inputMensaje" class="form-control" rows="3" placeholder="Ej: Tengo piel grasa y busco una base que controle el brillo y un labial de larga duración..."></textarea>
+                </div>
+
+                <!-- Botones de ejemplo rápido -->
+                <div class="mb-3">
+                    <label class="small text-muted d-block mb-1">Consultas rápidas:</label>
+                    <div class="d-flex flex-wrap gap-1">
+                        <button type="button" class="btn btn-sm btn-light border" onclick="llenarEjemplo('Grasa', 'Noche', 'Base matificante indeleble y labial rojo')">Look Noche Piel Grasa</button>
+                        <button type="button" class="btn btn-sm btn-light border" onclick="llenarEjemplo('Seca', 'Diario', 'Maquillaje natural hidratante para diario')">Look Natural Diario</button>
+                        <button type="button" class="btn btn-sm btn-light border" onclick="llenarEjemplo('Mixta', 'Fiesta', 'Sombras nude y delineador negro')">Ojos Definidos</button>
+                    </div>
+                </div>
+
+                <button id="btnConsultarIA" type="button" class="btn w-100 py-3 fw-bold text-white shadow-sm mt-auto" style="background-color: var(--color-accion);">
+                    <i class="bi bi-sparkles me-1"></i> Generar Recomendación IA
+                </button>
+            </div>
+        </div>
+
+        <!-- Panel Derecho: Respuesta de la Inteligencia Artificial -->
+        <div class="col-lg-7">
+            <div class="card card-custom p-4 shadow-sm h-100 d-flex flex-column" id="panelRespuestaIA">
+                <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3">
+                    <h5 class="fw-bold mb-0" style="color: var(--color-principal);">
+                        <i class="bi bi-chat-heart-fill me-2" style="color: var(--color-accion);"></i> Diagnóstico &amp; Cosméticos Sugeridos
+                    </h5>
+                    <span id="badgeEstadoIA" class="badge bg-secondary">Esperando consulta</span>
+                </div>
+
+                <!-- Estado Inicial / Vacío -->
+                <div id="iaEstadoInicial" class="text-center my-auto py-5">
+                    <div class="display-3 text-muted mb-3"><i class="bi bi-stars" style="color: var(--color-analitico);"></i></div>
+                    <h5 style="color: var(--color-principal);">Tu asesora de belleza está lista</h5>
+                    <p class="text-muted small">
+                        Completa tus preferencias a la izquierda y presiona <strong>"Generar Recomendación IA"</strong> para evaluar el catálogo en tiempo real.
+                    </p>
+                </div>
+
+                <!-- Spinner de Carga -->
+                <div id="iaSpinner" class="text-center my-auto py-5 d-none">
+                    <div class="spinner-border mb-3" style="width: 3rem; height: 3rem; color: var(--color-accion);" role="status"></div>
+                    <h5>Analizando tipo de piel y catálogo con IA...</h5>
+                    <p class="text-muted small">Evaluando compatibilidad de fórmulas cosméticas y existencias.</p>
+                </div>
+
+                <!-- Contenido Dinámico de la Respuesta -->
+                <div id="iaContenido" class="d-none">
+                    <div class="alert alert-light border-start border-4 p-3 mb-3 bg-white shadow-sm" style="border-left-color: var(--color-accion) !important;">
+                        <h6 class="fw-bold mb-1" style="color: var(--color-accion);"><i class="bi bi-lightbulb me-1"></i> Análisis de tu Asesora:</h6>
+                        <p id="iaTextoRespuesta" class="small mb-0 text-dark" style="white-space: pre-line;"></p>
+                    </div>
+
+                    <div class="card border-0 p-3 mb-4 rounded-3" style="background-color: #ede9fe;">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-award-fill fs-4 me-2" style="color: var(--color-analitico);"></i>
+                            <div>
+                                <strong class="d-block small text-dark">Consejo Cosmetológico Experto:</strong>
+                                <span id="iaConsejoExperto" class="small text-muted"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold mb-3 border-bottom pb-1" style="color: var(--color-principal);">
+                        <i class="bi bi-bag-check me-1" style="color: var(--color-exito);"></i> Cosméticos Recomendados para Ti:
+                    </h6>
+
+                    <div id="iaProductosContenedor" class="row row-cols-1 row-cols-sm-2 g-3">
+                        <!-- Aquí se insertan dinámicamente las tarjetas de producto recomendadas -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function llenarEjemplo(piel, ocasion, texto) {
+        document.getElementById('selectTipoPiel').value = piel;
+        document.getElementById('selectOcasion').value = ocasion;
+        document.getElementById('inputMensaje').value = texto;
+    }
+
+    document.getElementById('btnConsultarIA').addEventListener('click', async function () {
+        const mensaje = document.getElementById('inputMensaje').value.trim();
+        const tipoPiel = document.getElementById('selectTipoPiel').value;
+        const ocasion = document.getElementById('selectOcasion').value;
+        const presupuesto = document.getElementById('inputPresupuesto').value;
+
+        if (!mensaje && !tipoPiel && !ocasion) {
+            alert('Por favor escribe tu consulta o selecciona al menos tu tipo de piel u ocasión.');
+            return;
+        }
+
+        const payload = {
+            mensaje: mensaje || `Recomiéndame productos para piel ${tipoPiel} en ocasión ${ocasion}`,
+            tipoPiel: tipoPiel,
+            ocasion: ocasion,
+            presupuestoMaximo: presupuesto ? parseFloat(presupuesto) : null
+        };
+
+        // UI Loading
+        document.getElementById('iaEstadoInicial').classList.add('d-none');
+        document.getElementById('iaContenido').classList.add('d-none');
+        document.getElementById('iaSpinner').classList.remove('d-none');
+        document.getElementById('badgeEstadoIA').className = 'badge bg-warning text-dark';
+        document.getElementById('badgeEstadoIA').innerText = 'Procesando con IA...';
+
+        try {
+            const resp = await fetch('@Url.Action("Consultar", "AsesorIA")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await resp.json();
+            document.getElementById('iaSpinner').classList.add('d-none');
+
+            if (data && data.exitoso) {
+                document.getElementById('iaContenido').classList.remove('d-none');
+                document.getElementById('badgeEstadoIA').className = 'badge bg-success';
+                document.getElementById('badgeEstadoIA').innerText = 'Recomendación Lista';
+
+                document.getElementById('iaTextoRespuesta').innerText = data.respuesta;
+                document.getElementById('iaConsejoExperto').innerText = data.consejoExperto;
+
+                const contenedor = document.getElementById('iaProductosContenedor');
+                contenedor.innerHTML = '';
+
+                if (data.productosRecomendados && data.productosRecomendados.length > 0) {
+                    data.productosRecomendados.forEach(prod => {
+                        const img = prod.imagenUrl || 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=300&q=80';
+                        const col = document.createElement('div');
+                        col.className = 'col';
+                        col.innerHTML = `
+                            <div class="card h-100 card-custom border p-2">
+                                <img src="${img}" class="rounded mb-2" style="height: 120px; object-fit: cover;" alt="${prod.nombre}" />
+                                <span class="badge bg-light text-dark border align-self-start mb-1 small">${prod.categoria || 'Cosmético'}</span>
+                                <h6 class="fw-bold mb-1 small" style="color: var(--color-principal);">${prod.nombre}</h6>
+                                <p class="small text-muted mb-2 fst-italic" style="font-size: 0.75rem;">${prod.motivoRecomendacion}</p>
+                                <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold" style="color: var(--color-exito);">$${prod.precio.toFixed(2)}</span>
+                                    <form action="/Tienda/AgregarAlCarrito" method="post" style="display:inline;">
+                                        <input type="hidden" name="productoId" value="${prod.id}" />
+                                        <input type="hidden" name="cantidad" value="1" />
+                                        <button type="submit" class="btn text-white btn-sm py-1 px-2" style="background-color: var(--color-accion);">
+                                            <i class="bi bi-cart-plus"></i> Añadir
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        `;
+                        contenedor.appendChild(col);
+                    });
+                } else {
+                    contenedor.innerHTML = '<div class="col-12 text-muted small">No se hallaron productos con los criterios exactos.</div>';
+                }
+            } else {
+                alert('No se pudo procesar la recomendación: ' + (data?.respuesta || 'Error desconocido'));
+                document.getElementById('iaEstadoInicial').classList.remove('d-none');
+            }
+        } catch (err) {
+            document.getElementById('iaSpinner').classList.add('d-none');
+            document.getElementById('iaEstadoInicial').classList.remove('d-none');
+            alert('Error al procesar la IA: ' + err.message);
+        }
+    });
+</script>
+}

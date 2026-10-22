@@ -1,0 +1,188 @@
+@model IEnumerable<MakeupInventory.Models.Cuota>
+@{
+    ViewData["Title"] = "Clientes y Cuotas - Maquillaje SV";
+    decimal totalCuotas = ViewBag.TotalCuotas ?? 0m;
+    decimal totalCobrado = ViewBag.TotalCobrado ?? 0m;
+    decimal saldoPendiente = ViewBag.SaldoPendiente ?? 0m;
+    int cuotasVencidas = ViewBag.CuotasVencidas ?? 0;
+    int proximasVencer = ViewBag.ProximasVencer ?? 0;
+}
+
+<div class="container-fluid py-3">
+    <!-- Header del Módulo Clientes y Cuotas -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <span class="badge px-3 py-1 fw-bold text-uppercase small mb-1" style="background-color: #e0e7ff; color: #4338ca;">
+                <i class="bi bi-people-fill me-1"></i> Módulo de Clientes y Cobros
+            </span>
+            <h1 class="display-6 fw-bold mb-0" style="color: #172B4D;">Gestión de Clientes &amp; Cuotas</h1>
+            <p class="text-muted small mb-0">Seguimiento de compras en cuotas, saldos pendientes y fechas de vencimiento.</p>
+        </div>
+        <div class="d-flex gap-2 mt-2 mt-md-0">
+            <a asp-action="Nueva" class="btn text-white fw-bold" style="background-color: #E86A7A;">
+                <i class="bi bi-calendar-plus me-1"></i> Programar Nueva Cuota
+            </a>
+            <button onclick="window.print()" class="btn btn-outline-secondary">
+                <i class="bi bi-printer me-1"></i> Imprimir Reporte
+            </button>
+        </div>
+    </div>
+
+    <!-- Tarjetas de Resumen Financiero de Cuotas (Mockup 5.1.4.f) -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-sm-6">
+            <div class="card card-custom p-3 border-start border-4" style="border-left-color: #172B4D !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Total en Cuotas</div>
+                        <h3 class="fw-bold mb-0" style="color: #172B4D;">$@totalCuotas.ToString("0.00")</h3>
+                        <small class="text-muted">Total programado</small>
+                    </div>
+                    <div class="p-3 rounded-circle text-white" style="background-color: #172B4D;">
+                        <i class="bi bi-cash-stack fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-sm-6">
+            <div class="card card-custom p-3 border-start border-4" style="border-left-color: #2E9B72 !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Saldo Cobrado</div>
+                        <h3 class="fw-bold mb-0" style="color: #2E9B72;">$@totalCobrado.ToString("0.00")</h3>
+                        <small class="text-muted">Pagos recibidos</small>
+                    </div>
+                    <div class="p-3 rounded-circle text-white" style="background-color: #2E9B72;">
+                        <i class="bi bi-check-circle fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-sm-6">
+            <div class="card card-custom p-3 border-start border-4" style="border-left-color: #D99A2B !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Saldo Pendiente</div>
+                        <h3 class="fw-bold mb-0" style="color: #D99A2B;">$@saldoPendiente.ToString("0.00")</h3>
+                        <small class="text-muted">Por recuperar</small>
+                    </div>
+                    <div class="p-3 rounded-circle text-white" style="background-color: #D99A2B;">
+                        <i class="bi bi-hourglass-split fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-sm-6">
+            <div class="card card-custom p-3 border-start border-4" style="border-left-color: #C84C5A !important;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Cuotas Vencidas</div>
+                        <h3 class="fw-bold mb-0" style="color: #C84C5A;">@cuotasVencidas</h3>
+                        <small class="text-muted">@proximasVencer próximas a vencer</small>
+                    </div>
+                    <div class="p-3 rounded-circle text-white" style="background-color: #C84C5A;">
+                        <i class="bi bi-exclamation-triangle fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla Detallada de Clientas y Cuotas -->
+    <div class="card card-custom p-3 shadow-sm">
+        <h5 class="fw-bold mb-3 border-bottom pb-2" style="color: #172B4D;">
+            <i class="bi bi-journal-text me-2"></i> Estado de Cuentas por Cobrar
+        </h5>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Clienta</th>
+                        <th>Contacto</th>
+                        <th>Venta Asociada</th>
+                        <th class="text-end">Monto Cuota</th>
+                        <th>Próxima Fecha de Cobro</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-end">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">
+                                No hay registros de cuotas activas actualmente.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var c in Model)
+                        {
+                            bool estaVencida = c.Estado != "Pagada" && c.FechaVencimiento < DateTime.Now;
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">@(c.Cliente?.Nombre ?? c.Venta?.ClienteNombre ?? "Clienta General")</div>
+                                    <small class="text-muted">Ref. Clienta #@(c.ClienteId ?? 0)</small>
+                                </td>
+                                <td>
+                                    <small class="text-muted"><i class="bi bi-telephone me-1"></i>@(c.Cliente?.Telefono ?? c.Venta?.ClienteTelefono ?? "N/A")</small>
+                                </td>
+                                <td>
+                                    <a asp-controller="Ventas" asp-action="Details" asp-route-id="@c.VentaId" class="text-decoration-none fw-semibold">
+                                        Orden #@c.VentaId ($@(c.Venta?.Total.ToString("0.00") ?? "0.00"))
+                                    </a>
+                                </td>
+                                <td class="text-end fw-bold" style="color: #172B4D;">
+                                    $@c.Monto.ToString("0.00")
+                                </td>
+                                <td>
+                                    <span class="@(estaVencida ? "text-danger fw-bold" : "")">
+                                        <i class="bi bi-calendar-event me-1"></i>@c.FechaVencimiento.ToString("dd/MM/yyyy")
+                                    </span>
+                                    @if (estaVencida)
+                                    {
+                                        <span class="badge bg-danger ms-1 small">Vencida</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    @if (c.Estado == "Pagada")
+                                    {
+                                        <span class="badge" style="background-color: #2E9B72;">Pagada (@c.FechaPago?.ToString("dd/MM"))</span>
+                                    }
+                                    else if (estaVencida)
+                                    {
+                                        <span class="badge" style="background-color: #C84C5A;">Mora</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge" style="background-color: #D99A2B;">Pendiente</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    @if (c.Estado != "Pagada")
+                                    {
+                                        <form asp-action="RegistrarPago" asp-route-id="@c.Id" method="post" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm text-white" style="background-color: #2E9B72;" title="Registrar Cobro">
+                                                <i class="bi bi-cash me-1"></i> Cobrar
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-success small"><i class="bi bi-check-all me-1"></i>Saldado</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

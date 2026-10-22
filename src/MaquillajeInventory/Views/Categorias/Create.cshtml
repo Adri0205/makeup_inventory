@@ -1,0 +1,40 @@
+@model MakeupInventory.Models.Categoria
+@{
+    ViewData["Title"] = "Crear Categoría";
+}
+
+<div class="container py-3">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card card-custom p-4 shadow-sm">
+                <h3 class="fw-bold mb-3"><i class="bi bi-tag text-danger me-2"></i> Nueva Categoría</h3>
+
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Nombre" class="form-label fw-bold"></label>
+                        <input asp-for="Nombre" class="form-control" placeholder="Ej: Cuidado Facial / Sérums" />
+                        <span asp-validation-for="Nombre" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Descripcion" class="form-label fw-bold"></label>
+                        <textarea asp-for="Descripcion" class="form-control" rows="3" placeholder="Descripción breve de los cosméticos en este rubro..."></textarea>
+                        <span asp-validation-for="Descripcion" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-beauty px-4">Guardar</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Maquillaje SV</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts: Inter (Fase 1 - Sección 5.1.6) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    
+    <style>
+        /* ==========================================================================
+           IDENTIDAD VISUAL MAQUILLAJE SV (FASE 1 - SECCIÓN 5.1.6)
+           ========================================================================== */
+        :root {
+            --color-principal: #172B4D;    /* Azul petróleo */
+            --color-accion: #E86A7A;       /* Coral rosado */
+            --color-analitico: #8B7CF6;    /* Lavanda */
+            --color-fondo: #FBFAF8;        /* Marfil claro */
+            --color-superficie: #FFFFFF;   /* Blanco */
+            --color-bordes: #E7E4E1;       /* Gris cálido */
+            --color-exito: #2E9B72;        /* Verde */
+            --color-advertencia: #D99A2B;  /* Ámbar */
+            --color-error: #C84C5A;        /* Rojo */
+            --radio-tarjetas: 14px;
+            --radio-botones: 10px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--color-fondo);
+            color: #172B4D;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Layout con Sidebar Persistente (Sección 5.1.1 & 5.1.3) */
+        .app-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar-persistent {
+            width: 260px;
+            background-color: var(--color-principal);
+            color: #FFFFFF;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            z-index: 1030;
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #FFFFFF;
+        }
+
+        .sidebar-brand-icon {
+            width: 42px;
+            height: 42px;
+            background-color: var(--color-accion);
+            color: white;
+            border-radius: var(--radio-botones);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            box-shadow: 0 4px 10px rgba(232, 106, 122, 0.35);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 1rem 0.75rem;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .sidebar-menu-header {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.45);
+            padding: 0.75rem 0.75rem 0.25rem;
+            font-weight: 700;
+        }
+
+        .sidebar-item {
+            margin-bottom: 4px;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.65rem 0.85rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: var(--radio-botones);
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-link:hover, .sidebar-link.active {
+            background-color: rgba(255, 255, 255, 0.12);
+            color: #FFFFFF;
+        }
+
+        .sidebar-link.action-highlight {
+            background-color: var(--color-accion);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(232, 106, 122, 0.3);
+        }
+
+        .sidebar-link.action-highlight:hover {
+            background-color: #d65969;
+        }
+
+        /* Contenido Principal */
+        .content-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .top-navbar {
+            background-color: var(--color-superficie);
+            border-bottom: 1px solid var(--color-bordes);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+            box-shadow: 0 2px 8px rgba(23, 43, 77, 0.03);
+        }
+
+        .main-body {
+            flex-grow: 1;
+            padding: 1.5rem;
+        }
+
+        /* Tarjetas y Botones (Fase 1) */
+        .card-custom {
+            border: 1px solid var(--color-bordes);
+            border-radius: var(--radio-tarjetas);
+            background-color: var(--color-superficie);
+            box-shadow: 0 2px 10px rgba(23, 43, 77, 0.04);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card-custom:hover {
+            box-shadow: 0 6px 18px rgba(23, 43, 77, 0.07);
+        }
+
+        .btn {
+            border-radius: var(--radio-botones);
+            font-weight: 600;
+            padding: 0.55rem 1.15rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-coral {
+            background-color: var(--color-accion);
+            border-color: var(--color-accion);
+            color: #FFFFFF;
+        }
+
+        .btn-coral:hover {
+            background-color: #d65969;
+            border-color: #d65969;
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(232, 106, 122, 0.35);
+        }
+
+        .btn-petroleo {
+            background-color: var(--color-principal);
+            border-color: var(--color-principal);
+            color: #FFFFFF;
+        }
+
+        .btn-petroleo:hover {
+            background-color: #101f37;
+            border-color: #101f37;
+            color: #FFFFFF;
+        }
+
+        .btn-outline-coral {
+            border: 2px solid var(--color-accion);
+            color: var(--color-accion);
+            background: transparent;
+        }
+
+        .btn-outline-coral:hover {
+            background-color: #fdf2f3;
+            color: #d65969;
+        }
+
+        .btn-beauty {
+            background-color: var(--color-accion);
+            border-color: var(--color-accion);
+            color: #FFFFFF;
+        }
+
+        .btn-beauty:hover {
+            background-color: #d65969;
+            border-color: #d65969;
+            color: #FFFFFF;
+        }
+
+        .badge-cart {
+            background-color: var(--color-accion);
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25em 0.55em;
+            border-radius: 50rem;
+        }
+
+        .footer-site {
+            background-color: var(--color-superficie);
+            border-top: 1px solid var(--color-bordes);
+            padding: 1.25rem 1.5rem;
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+
+        /* Responsive Sidebar */
+        @@media (max-width: 991.98px) {
+            .sidebar-persistent {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                left: -260px;
+            }
+            .sidebar-persistent.show {
+                left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-wrapper">
+        <!-- BARRA LATERAL PERSISTENTE (MOCKUP FASE 1 - SECCIÓN 5.1.1 Y 5.1.3) -->
+        <aside class="sidebar-persistent" id="sidebarNav">
+            <a asp-controller="Admin" asp-action="Index" class="sidebar-brand">
+                <div class="sidebar-brand-icon">
+                    <i class="bi bi-gem"></i>
+                </div>
+                <div>
+                    <div class="fw-bold fs-5 lh-1">Maquillaje SV</div>
+                    <div style="font-size: 0.68rem; color: rgba(255, 255, 255, 0.55); letter-spacing: 0.5px; text-transform: uppercase;">Gestión &amp; Tienda</div>
+                </div>
+            </a>
+
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-header">Módulos de Gestión</li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" asp-controller="Admin" asp-action="Index">
+                        <i class="bi bi-grid-1x2-fill"></i> Inicio / Dashboard
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" asp-controller="Productos" asp-action="Index">
+                        <i class="bi bi-box-seam-fill"></i> Inventario
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" asp-controller="Ventas" asp-action="Nueva">
+                        <i class="bi bi-calculator-fill"></i> Registrar Venta (POS)
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" asp-controller="Ventas" asp-action="Index">
+                        <i class="bi bi-receipt"></i> Historial de Ventas
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" asp-controller="Cuotas" asp-action="Index">
+                        <i class="bi bi-people-fill"></i> Clientes y Cuotas
+                    </a>
+                </li>
+
+                <li class="sidebar-menu-header">Almacén &amp; Control</li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" asp-controller="Inventario" asp-action="Movimientos">
+                        <i class="bi bi-arrow-left-right"></i> Kárdex Movimientos
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" asp-controller="Inventario" asp-action="Entrada">
+                        <i class="bi bi-truck"></i> Reabastecer Stock
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" asp-controller="Categorias" asp-action="Index">
+                        <i class="bi bi-tags-fill"></i> Categorías
+                    </a>
+                </li>
+
+                <li class="sidebar-menu-header">Inteligencia Artificial</li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" asp-controller="AsesorIA" asp-action="ReporteInventario">
+                        <i class="bi bi-cpu-fill" style="color: var(--color-analitico);"></i> Diagnóstico Stock IA
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" asp-controller="AsesorIA" asp-action="Index">
+                        <i class="bi bi-stars" style="color: var(--color-accion);"></i> Asesora Virtual IA
+                    </a>
+                </li>
+
+                <li class="sidebar-menu-header">Portal Cliente</li>
+                <li class="sidebar-item mt-2">
+                    <a class="sidebar-link action-highlight" asp-controller="Tienda" asp-action="Index">
+                        <i class="bi bi-shop"></i> Tienda Online Clienta
+                    </a>
+                </li>
+            </ul>
+
+            <div class="p-3 border-top border-secondary border-opacity-25 small text-center" style="color: rgba(255, 255, 255, 0.45); font-size: 0.75rem;">
+                Maquillaje SV &bull; v2.0
+            </div>
+        </aside>
+
+        <!-- ÁREA DE CONTENIDO -->
+        <div class="content-area">
+            <!-- Barra Superior de Navegación -->
+            <header class="top-navbar">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn btn-sm btn-outline-secondary d-lg-none" type="button" id="sidebarToggleBtn">
+                        <i class="bi bi-list fs-5"></i>
+                    </button>
+                    <span class="d-none d-sm-inline fw-semibold text-muted small">
+                        <i class="bi bi-shop-window me-1"></i> Maquillaje SV &bull; Sistema Administrativo &amp; E-Commerce
+                    </span>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Acceso rápido a Tienda Online Cliente -->
+                    <a asp-controller="Tienda" asp-action="Index" class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1">
+                        <i class="bi bi-eye"></i> <span class="d-none d-md-inline">Ver como Clienta</span>
+                    </a>
+
+                    <!-- Carrito de compras -->
+                    <a asp-controller="Tienda" asp-action="Carrito" class="btn btn-sm btn-outline-coral position-relative" title="Carrito de compras">
+                        <i class="bi bi-cart3"></i>
+                        <span class="d-none d-sm-inline ms-1">Bolsa</span>
+                        <span class="badge-cart ms-1">@(ViewBag.TotalItemsCarrito ?? 0)</span>
+                    </a>
+
+                    <!-- Usuario Activo -->
+                    <div class="d-flex align-items-center gap-2 border-start ps-3">
+                        <div class="rounded-circle text-white d-flex align-items-center justify-content-center" 
+                             style="width: 34px; height: 34px; background-color: var(--color-principal); font-size: 0.85rem; font-weight: 700;">
+                            SV
+                        </div>
+                        <div class="d-none d-md-block text-start lh-1">
+                            <div class="fw-bold small" style="color: var(--color-principal);">Propietaria</div>
+                            <small class="text-muted" style="font-size: 0.7rem;">Administradora</small>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Alertas Globales -->
+            <div class="px-4 pt-3">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm d-flex align-items-center mb-0" role="alert">
+                        <i class="bi bi-check-circle-fill fs-5 me-2" style="color: var(--color-exito);"></i>
+                        <div>@TempData["Success"]</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm d-flex align-items-center mb-0" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill fs-5 me-2" style="color: var(--color-error);"></i>
+                        <div>@TempData["Error"]</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+            </div>
+
+            <!-- Contenido Dinámico de la Vista -->
+            <main class="main-body" role="main">
+                @RenderBody()
+            </main>
+
+            <!-- Pie de Página Limpio -->
+            <footer class="footer-site">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <div>
+                        <strong>Maquillaje SV</strong> &copy; 2026. Todos los derechos reservados.
+                    </div>
+                    <div>
+                        Control de Inventario, Ventas, Cuotas y Asesoría con Inteligencia Artificial.
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Scripts Base -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        // Toggle responsive para sidebar en pantallas pequeñas
+        const toggleBtn = document.getElementById('sidebarToggleBtn');
+        const sidebar = document.getElementById('sidebarNav');
+        if (toggleBtn && sidebar) {
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('show');
+            });
+        }
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

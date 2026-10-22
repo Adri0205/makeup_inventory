@@ -1,0 +1,145 @@
+@model IEnumerable<MakeupInventory.Models.Producto>
+
+@{
+    ViewData["Title"] = "Inventario de Productos - Maquillaje SV";
+}
+
+<div class="container-fluid py-3">
+    <!-- Encabezado del Módulo de Inventario (Mockup 5.1.4.c) -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <span class="badge px-3 py-1 fw-bold text-uppercase small mb-1" style="background-color: #e0e7ff; color: #4338ca;">
+                <i class="bi bi-box-seam me-1"></i> Módulo de Inventario
+            </span>
+            <h1 class="display-6 fw-bold mb-0" style="color: var(--color-principal);">Inventario de Cosméticos</h1>
+            <p class="text-muted small mb-0">Existencias, precios, categorías y estados de disponibilidad en almacén.</p>
+        </div>
+        <div class="d-flex gap-2 mt-2 mt-md-0">
+            <a asp-action="Create" class="btn text-white fw-bold shadow-sm" style="background-color: var(--color-accion);">
+                <i class="bi bi-plus-lg me-1"></i> Nuevo Producto
+            </a>
+            <a asp-controller="Inventario" asp-action="Entrada" class="btn btn-outline-secondary">
+                <i class="bi bi-truck me-1"></i> Entrada de Stock
+            </a>
+        </div>
+    </div>
+
+    <!-- Barra de Búsqueda y Filtros sobre la Tabla (Mockup 5.1.4.c) -->
+    <div class="card card-custom p-3 mb-4 shadow-sm">
+        <div class="row g-2 align-items-center">
+            <div class="col-md-7">
+                <div class="input-group">
+                    <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="filtroInventario" class="form-control" placeholder="Buscar producto por nombre, categoría o proveedor..." onkeyup="filtrarTabla()" />
+                </div>
+            </div>
+            <div class="col-md-5 d-flex justify-content-md-end gap-2 text-muted small align-items-center">
+                <span>Total de Referencias: <strong class="text-dark">@Model.Count()</strong></span>
+                <span class="badge" style="background-color: #2E9B72;">Disponible</span>
+                <span class="badge" style="background-color: #D99A2B;">Stock Bajo</span>
+                <span class="badge" style="background-color: #C84C5A;">Agotado</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Inventario con Estados Semánticos (Mockup 5.1.4.c) -->
+    <div class="card card-custom p-3 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="tablaProductos">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 60px;">Foto</th>
+                        <th>Nombre del Producto</th>
+                        <th>Categoría</th>
+                        <th>Proveedor</th>
+                        <th>Precio</th>
+                        <th class="text-center">Stock</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-end" style="min-width: 150px;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        string estadoTexto;
+                        string estadoColor;
+                        if (item.Stock <= 0)
+                        {
+                            estadoTexto = "Agotado";
+                            estadoColor = "var(--color-error)";
+                        }
+                        else if (item.Stock <= 5)
+                        {
+                            estadoTexto = "Stock bajo";
+                            estadoColor = "var(--color-advertencia)";
+                        }
+                        else
+                        {
+                            estadoTexto = "Disponible";
+                            estadoColor = "var(--color-exito)";
+                        }
+
+                        <tr>
+                            <td>
+                                <img src="@(item.ImagenUrl ?? "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=150&q=80")" 
+                                     class="rounded shadow-sm" style="width: 44px; height: 44px; object-fit: cover;" alt="@item.Nombre" />
+                            </td>
+                            <td>
+                                <div class="fw-bold" style="color: var(--color-principal);">@item.Nombre</div>
+                                <small class="text-muted text-truncate d-inline-block" style="max-width: 220px;">
+                                    @(item.Descripcion ?? "Sin descripción")
+                                </small>
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">
+                                    @(item.Categoria?.Nombre ?? "General")
+                                </span>
+                            </td>
+                            <td class="text-muted small">
+                                @(item.Proveedor ?? "Original")
+                            </td>
+                            <td class="fw-bold text-dark">
+                                $@item.Precio.ToString("0.00")
+                            </td>
+                            <td class="text-center fw-bold">
+                                @item.Stock
+                            </td>
+                            <td class="text-center">
+                                <span class="badge text-white px-2 py-1" style="background-color: @estadoColor;">
+                                    @estadoTexto
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-info" title="Detalles">
+                                        <i class="bi bi-info-circle"></i>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-warning" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger" title="Eliminar">
+                                        <i class="bi bi-trash3"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function filtrarTabla() {
+        const input = document.getElementById("filtroInventario").value.toLowerCase();
+        const filas = document.querySelectorAll("#tablaProductos tbody tr");
+
+        filas.forEach(fila => {
+            const texto = fila.innerText.toLowerCase();
+            fila.style.display = texto.includes(input) ? "" : "none";
+        });
+    }
+</script>
+}

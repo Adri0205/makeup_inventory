@@ -1,0 +1,169 @@
+﻿@{
+    ViewData["Title"] = "Asesora Virtual IA";
+}
+
+<div class="container-fluid px-4">
+    <!-- Encabezado del Módulo -->
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <div>
+            <span class="badge bg-danger-subtle text-danger mb-1 fw-semibold">INTELIGENCIA ARTIFICIAL</span>
+            <h2 class="fw-bold mb-0 text-dark">Asesora Virtual IA</h2>
+            <p class="text-muted small mb-0">Consulta inventario, recomendaciones de productos, promociones y sugerencias de venta directa.</p>
+        </div>
+        <button class="btn btn-outline-secondary btn-sm" onclick="limpiarChat()">
+            <i class="fas fa-trash-alt me-1"></i> Limpiar Chat
+        </button>
+    </div>
+
+    <div class="row">
+        <!-- Columna Principal: Área de Chat -->
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm rounded-4 style="min-height: 580px; display: flex; flex-direction: column;">
+                <!-- Chat Header -->
+                <div class="card-header bg-white border-bottom py-3 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div class="p-2 bg-danger-subtle text-danger rounded-circle me-2">
+                            <i class="fas fa-sparkles fa-lg"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark">GlowAI Assistant</h6>
+                            <small class="text-success"><i class="fas fa-circle fa-xs me-1"></i>En línea | Conectado a SQL Server</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Body (Historial de Mensajes) -->
+                <div class="card-body overflow-auto flex-grow-1 p-3" id="chatContainer" style="max-height: 440px;">
+                    <!-- Mensaje Inicial de Bienvenida -->
+                    <div class="d-flex mb-3">
+                        <div class="bg-light p-3 rounded-4 border text-dark style="max-width: 85%;">
+                            <p class="mb-1 fw-medium text-danger"><i class="fas fa-robot me-1"></i> GlowAI Assistant</p>
+                            <p class="mb-0">¡Hola! Soy tu asesora virtual. Puedo ayudarte a verificar existencias, sugerir productos complementarios o resolver dudas frecuentes de clientes en tienda. ¿En qué te ayudo hoy?</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Footer (Entrada de Mensaje) -->
+                <div class="card-footer bg-white border-top p-3">
+                    <form id="iaQueryForm" onsubmit="enviarPregunta(event)">
+                        <div class="input-group">
+                            <input type="text" id="userInput" class="form-control form-control-lg border-end-0" 
+                                   placeholder="Escribe tu consulta sobre stock, precios o combos..." required autocomplete="off" />
+                            <button class="btn btn-danger px-4" type="submit" id="btnEnviar">
+                                <i class="fas fa-paper-plane me-1"></i> Preguntar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Lateral: Accesos Rápidos & Consultas Frecuentes -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm rounded-4 mb-3">
+                <div class="card-body">
+                    <h6 class="fw-bold text-dark mb-3"><i class="fas fa-bolt text-warning me-2"></i>Consultas Rápidas en Mostrador</h6>
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-danger text-start btn-sm p-2 rounded-3" onclick="usarPromptRapido('¿Qué productos tienen stock menor a 5 unidades?')">
+                            <i class="fas fa-exclamation-triangle me-2"></i> Stock crítico (≤ 5 unidades)
+                        </button>
+                        <button type="button" class="btn btn-outline-danger text-start btn-sm p-2 rounded-3" onclick="usarPromptRapido('¿Qué productos puedo ofrecer como alternativa para base de maquillaje?')">
+                            <i class="fas fa-magic me-2"></i> Sugerencias / Cross-Selling
+                        </button>
+                        <button type="button" class="btn btn-outline-danger text-start btn-sm p-2 rounded-3" onclick="usarPromptRapido('¿Cuáles son los 3 cosméticos más vendidos este mes?')">
+                            <i class="fas fa-chart-line me-2"></i> Top productos vendidos
+                        </button>
+                        <button type="button" class="btn btn-outline-danger text-start btn-sm p-2 rounded-3" onclick="usarPromptRapido('Dime los precios y stock de los labiales disponibles')">
+                            <i class="fas fa-search-dollar me-2"></i> Consultar precios de labiales
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card de Contexto Técnico (Opcional para el empleado/admin) -->
+            <div class="card border-0 shadow-sm rounded-4 bg-light">
+                <div class="card-body">
+                    <h6 class="fw-bold text-secondary mb-2"><i class="fas fa-database me-2"></i>Base de Datos Vinculada</h6>
+                    <p class="small text-muted mb-0">La IA consulta en tiempo real las tablas: <code>Productos</code>, <code>Categorias</code>, <code>Ventas</code> y <code>MovimientoInventario</code>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function usarPromptRapido(texto) {
+        document.getElementById('userInput').value = texto;
+        enviarPregunta();
+    }
+
+    function enviarPregunta(e) {
+        if (e) e.preventDefault();
+        const input = document.getElementById('userInput');
+        const mensaje = input.value.trim();
+        if (!mensaje) return;
+
+        const container = document.getElementById('chatContainer');
+
+        //Renderizar mensaje del usuario
+        container.innerHTML += `
+            <div class="d-flex justify-content-end mb-3">
+                <div class="bg-danger text-white p-3 rounded-4 style="max-width: 80%;">
+                    <p class="mb-0">${mensaje}</p>
+                </div>
+            </div>`;
+        
+        input.value = '';
+        container.scrollTop = container.scrollHeight;
+
+        //Renderizar indicador de carga
+        const loadingId = 'loading-' + Date.now();
+        container.innerHTML += `
+            <div class="d-flex mb-3" id="${loadingId}">
+                <div class="bg-light p-3 rounded-4 border text-muted">
+                    <i class="fas fa-spinner fa-spin me-2"></i> Analizando base de datos...
+                </div>
+            </div>`;
+        container.scrollTop = container.scrollHeight;
+
+        //Petición AJAX al Controller en C# MVC
+        fetch('@Url.Action("ConsultarIa", "Ia")', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: mensaje })
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById(loadingId).remove();
+            container.innerHTML += `
+                <div class="d-flex mb-3">
+                    <div class="bg-light p-3 rounded-4 border text-dark" style="max-width: 85%;">
+                        <p class="mb-1 fw-medium text-danger"><i class="fas fa-robot me-1"></i> GlowAI Assistant</p>
+                        <p class="mb-0">${data.respuesta}</p>
+                    </div>
+                </div>`;
+            container.scrollTop = container.scrollHeight;
+        })
+        .catch(err => {
+            document.getElementById(loadingId).remove();
+            container.innerHTML += `
+                <div class="d-flex mb-3">
+                    <div class="bg-danger-subtle text-danger p-3 rounded-4 border" style="max-width: 85%;">
+                        <i class="fas fa-exclamation-circle me-1"></i> Error al conectar con el servidor. Por favor, reintenta.
+                    </div>
+                </div>`;
+        });
+    }
+
+    function limpiarChat() {
+        document.getElementById('chatContainer').innerHTML = `
+            <div class="d-flex mb-3">
+                <div class="bg-light p-3 rounded-4 border text-dark" style="max-width: 85%;">
+                    <p class="mb-1 fw-medium text-danger"><i class="fas fa-robot me-1"></i> GlowAI Assistant</p>
+                    <p class="mb-0">Chat reiniciado. ¿En qué más puedo ayudarte?</p>
+                </div>
+            </div>`;
+    }
+</script>
+}

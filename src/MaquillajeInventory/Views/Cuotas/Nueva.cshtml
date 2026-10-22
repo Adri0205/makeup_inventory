@@ -1,0 +1,80 @@
+@model MakeupInventory.Models.Cuota
+@{
+    ViewData["Title"] = "Programar Nueva Cuota";
+    var ventas = ViewBag.Ventas as IEnumerable<MakeupInventory.Models.Venta> ?? Enumerable.Empty<MakeupInventory.Models.Venta>();
+    var clientes = ViewBag.Clientes as IEnumerable<MakeupInventory.Models.Cliente> ?? Enumerable.Empty<MakeupInventory.Models.Cliente>();
+}
+
+<div class="container py-3">
+    <div class="row justify-content-center">
+        <div class="col-md-7">
+            <div class="card card-custom p-4 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                    <div>
+                        <h4 class="fw-bold mb-0" style="color: #172B4D;">
+                            <i class="bi bi-calendar2-plus text-danger me-2"></i> Programar Pago en Cuota
+                        </h4>
+                        <small class="text-muted">Establece el monto y fecha de cobro para una venta acordada.</small>
+                    </div>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Volver al Control</a>
+                </div>
+
+                <form asp-action="Nueva" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Seleccionar Venta / Orden:</label>
+                        <select asp-for="VentaId" class="form-select" required>
+                            <option value="">-- Seleccionar Venta --</option>
+                            @foreach (var v in ventas)
+                            {
+                                <option value="@v.Id">Orden #@v.Id - @v.Fecha.ToString("dd/MM/yyyy") - Total: $@v.Total.ToString("0.00") (@(v.ClienteNombre ?? "Clienta"))</option>
+                            }
+                        </select>
+                        <span asp-validation-for="VentaId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Clienta Asociada:</label>
+                        <select asp-for="ClienteId" class="form-select">
+                            <option value="">-- Seleccionar Clienta Registrada --</option>
+                            @foreach (var cl in clientes)
+                            {
+                                <option value="@cl.Id">@cl.Nombre (@cl.Telefono)</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Monto" class="form-label fw-bold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="Monto" class="form-control" type="number" step="0.01" placeholder="Ej: 15.00" required />
+                            </div>
+                            <span asp-validation-for="Monto" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="FechaVencimiento" class="form-label fw-bold"></label>
+                            <input asp-for="FechaVencimiento" class="form-control" type="date" value="@DateTime.Now.AddDays(15).ToString("yyyy-MM-dd")" required />
+                            <span asp-validation-for="FechaVencimiento" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn text-white px-4 fw-bold" style="background-color: #E86A7A;">
+                            <i class="bi bi-save me-1"></i> Guardar Cuota
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

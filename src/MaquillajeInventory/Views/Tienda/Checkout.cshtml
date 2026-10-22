@@ -1,0 +1,124 @@
+@model MakeupInventory.Models.CheckoutViewModel
+@{
+    ViewData["Title"] = "Finalizar Pedido / Checkout";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h1 class="display-6 fw-bold">
+            <i class="bi bi-credit-card-2-front text-danger me-2"></i> Finalizar Compra
+        </h1>
+        <p class="text-muted">Por favor completa tus datos para procesar el pedido y generar tu comprobante.</p>
+    </div>
+
+    <form asp-action="Checkout" method="post">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+        <div class="row g-4">
+            <!-- Datos del Cliente y Envío -->
+            <div class="col-lg-7">
+                <div class="card card-custom p-4 mb-4">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">
+                        <i class="bi bi-person-circle me-1 text-primary"></i> 1. Datos Personales &amp; de Contacto
+                    </h5>
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label asp-for="ClienteNombre" class="form-label fw-semibold"></label>
+                            <input asp-for="ClienteNombre" class="form-control" placeholder="Ej: Marcela Alejandra Gómez" />
+                            <span asp-validation-for="ClienteNombre" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ClienteEmail" class="form-label fw-semibold"></label>
+                            <input asp-for="ClienteEmail" class="form-control" placeholder="nombre@correo.com" />
+                            <span asp-validation-for="ClienteEmail" class="text-danger small"></span>
+                            <div class="form-text">Te enviaremos la confirmación a este correo.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ClienteTelefono" class="form-label fw-semibold"></label>
+                            <input asp-for="ClienteTelefono" class="form-control" placeholder="+503 7123-4567" />
+                            <span asp-validation-for="ClienteTelefono" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-12">
+                            <label asp-for="DireccionEntrega" class="form-label fw-semibold"></label>
+                            <textarea asp-for="DireccionEntrega" class="form-control" rows="2" placeholder="Dirección completa, colonia, número de casa y puntos de referencia..."></textarea>
+                            <span asp-validation-for="DireccionEntrega" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Método de Pago -->
+                <div class="card card-custom p-4">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">
+                        <i class="bi bi-wallet2 me-1 text-success"></i> 2. Método de Pago
+                    </h5>
+                    
+                    <div class="d-flex flex-column gap-2">
+                        <div class="form-check p-3 border rounded-3 bg-light">
+                            <input class="form-check-input" type="radio" asp-for="MetodoPago" value="Tarjeta de Crédito / Débito" id="pagoTarjeta" checked>
+                            <label class="form-check-label d-flex justify-content-between align-items-center w-100" for="pagoTarjeta">
+                                <span><i class="bi bi-credit-card-fill text-primary me-2"></i> <strong>Tarjeta de Crédito / Débito (Visa / Mastercard)</strong></span>
+                                <span class="badge bg-primary">Instantáneo</span>
+                            </label>
+                        </div>
+                        <div class="form-check p-3 border rounded-3">
+                            <input class="form-check-input" type="radio" asp-for="MetodoPago" value="Transferencia Bancaria" id="pagoTransf">
+                            <label class="form-check-label d-flex justify-content-between align-items-center w-100" for="pagoTransf">
+                                <span><i class="bi bi-bank2 text-secondary me-2"></i> <strong>Transferencia Bancaria / Chivo Wallet / Banco Agrícola</strong></span>
+                            </label>
+                        </div>
+                        <div class="form-check p-3 border rounded-3">
+                            <input class="form-check-input" type="radio" asp-for="MetodoPago" value="Efectivo contra Entrega" id="pagoEfectivo">
+                            <label class="form-check-label d-flex justify-content-between align-items-center w-100" for="pagoEfectivo">
+                                <span><i class="bi bi-cash-stack text-success me-2"></i> <strong>Efectivo al recibir el producto</strong></span>
+                            </label>
+                        </div>
+                    </div>
+                    <span asp-validation-for="MetodoPago" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <!-- Resumen de Pedido -->
+            <div class="col-lg-5">
+                <div class="card card-custom p-4 sticky-top" style="top: 80px;">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">Artículos a Comprar</h5>
+                    
+                    <ul class="list-group list-group-flush mb-3">
+                        @foreach (var item in Model.Items)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                <div>
+                                    <div class="fw-semibold">@item.Nombre</div>
+                                    <small class="text-muted">@item.Cantidad x $@item.Precio.ToString("0.00")</small>
+                                </div>
+                                <span class="fw-bold text-dark">$@item.Subtotal.ToString("0.00")</span>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal:</span>
+                        <span class="fw-bold">$@Model.Subtotal.ToString("0.00")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">IVA (13%):</span>
+                        <span class="fw-bold">$@Model.ImpuestoIVA.ToString("0.00")</span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="fs-5 fw-bold">Total Final:</span>
+                        <span class="fs-4 fw-bold text-danger">$@Model.Total.ToString("0.00")</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-beauty w-100 py-3 fs-5 fw-bold shadow">
+                        <i class="bi bi-bag-check-fill me-1"></i> Confirmar y Realizar Pedido
+                    </button>
+
+                    <div class="text-center mt-3 small text-muted">
+                        Al confirmar, se actualizará automáticamente el inventario del almacén en tiempo real.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

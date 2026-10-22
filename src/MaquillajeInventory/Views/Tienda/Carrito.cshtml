@@ -1,0 +1,133 @@
+@model IEnumerable<MakeupInventory.Models.CarritoItem>
+@{
+    ViewData["Title"] = "Carrito de Compras";
+    decimal subtotal = ViewBag.Subtotal ?? 0m;
+    decimal iva = ViewBag.IVA ?? 0m;
+    decimal total = ViewBag.Total ?? 0m;
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-6 fw-bold mb-0">
+            <i class="bi bi-cart3 text-danger me-2"></i> Mi Carrito de Compras
+        </h1>
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Seguir Comprando
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="card card-custom p-5 text-center my-4">
+            <div class="display-1 text-muted mb-3"><i class="bi bi-cart-x"></i></div>
+            <h3 class="fw-bold">Tu carrito está actualmente vacío</h3>
+            <p class="text-muted mb-4">Parece que aún no has agregado productos a tu bolsa de cosméticos.</p>
+            <div>
+                <a asp-action="Index" class="btn btn-beauty px-4 py-2">
+                    <i class="bi bi-bag-heart me-1"></i> Descubrir Productos
+                </a>
+                <a asp-controller="AsesorIA" asp-action="Index" class="btn btn-outline-beauty ms-2 px-4 py-2">
+                    <i class="bi bi-stars me-1"></i> Pedir recomendación a la IA
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <!-- Columna de Artículos en el Carrito -->
+            <div class="col-lg-8">
+                <div class="card card-custom p-3">
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" style="min-width: 250px;">Producto</th>
+                                    <th scope="col">Precio</th>
+                                    <th scope="col" style="width: 140px;">Cantidad</th>
+                                    <th scope="col" class="text-end">Subtotal</th>
+                                    <th scope="col" class="text-center"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="@(item.ImagenUrl ?? "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=200&q=80")" 
+                                                     class="rounded me-3" style="width: 55px; height: 55px; object-fit: cover;" alt="@item.Nombre">
+                                                <div>
+                                                    <h6 class="mb-0 fw-bold">@item.Nombre</h6>
+                                                    <small class="text-muted">@item.CategoriaNombre</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="fw-semibold">$@item.Precio.ToString("0.00")</td>
+                                        <td>
+                                            <form asp-action="ActualizarCantidad" method="post" class="d-flex align-items-center gap-1">
+                                                <input type="hidden" name="productoId" value="@item.ProductoId" />
+                                                <input type="number" name="cantidad" value="@item.Cantidad" min="1" max="@item.StockDisponible" 
+                                                       class="form-control form-control-sm text-center fw-bold" style="width: 70px;" onchange="this.form.submit()" />
+                                            </form>
+                                            <small class="text-muted d-block" style="font-size: 0.7rem;">(Disp: @item.StockDisponible)</small>
+                                        </td>
+                                        <td class="text-end fw-bold text-dark">$@item.Subtotal.ToString("0.00")</td>
+                                        <td class="text-center">
+                                            <form asp-action="EliminarDelCarrito" method="post">
+                                                <input type="hidden" name="productoId" value="@item.ProductoId" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger border-0" title="Eliminar del carrito">
+                                                    <i class="bi bi-trash3"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Columna Resumen de Compra -->
+            <div class="col-lg-4">
+                <div class="card card-custom p-4">
+                    <h5 class="fw-bold mb-3 border-bottom pb-2">Resumen de tu Pedido</h5>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Subtotal:</span>
+                        <span class="fw-bold">$@subtotal.ToString("0.00")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">IVA (13% El Salvador):</span>
+                        <span class="fw-bold">$@iva.ToString("0.00")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 text-muted">
+                        <span>Envío Nacional:</span>
+                        <span class="badge bg-success-subtle text-success">GRATIS</span>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="fs-5 fw-bold">Total a Pagar:</span>
+                        <span class="fs-4 fw-bold text-danger">$@total.ToString("0.00")</span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a asp-action="Checkout" class="btn btn-beauty py-2 fs-6">
+                            <i class="bi bi-credit-card me-1"></i> Proceder al Checkout
+                        </a>
+                        <a asp-action="Index" class="btn btn-outline-secondary py-2">
+                            <i class="bi bi-arrow-left me-1"></i> Continuar Explorando
+                        </a>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top text-center text-muted small">
+                        <i class="bi bi-shield-check text-success me-1"></i> Compra 100% segura y garantizada
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

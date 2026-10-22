@@ -1,0 +1,89 @@
+@model MakeupInventory.Models.Producto
+
+@{
+    ViewData["Title"] = "Editar Producto #" + Model.Id;
+}
+
+<div class="container py-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0"><i class="bi bi-pencil-square text-warning me-2"></i> Editar Producto #@Model.Id</h2>
+            <p class="text-muted small mb-0">Actualiza las existencias, precio o datos descriptivos del cosmético.</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Volver al Listado
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card card-custom p-4 shadow-sm">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <input type="hidden" asp-for="FechaIngreso" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label asp-for="Nombre" class="form-label fw-bold"></label>
+                            <input asp-for="Nombre" class="form-control" />
+                            <span asp-validation-for="Nombre" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="CategoriaId" class="form-label fw-bold"></label>
+                            <select asp-for="CategoriaId" class="form-select" asp-items="@(new SelectList(ViewBag.Categorias, "Id", "Nombre", Model.CategoriaId))">
+                            </select>
+                            <span asp-validation-for="CategoriaId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Proveedor" class="form-label fw-bold"></label>
+                            <input asp-for="Proveedor" class="form-control" />
+                            <span asp-validation-for="Proveedor" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Precio" class="form-label fw-bold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="Precio" class="form-control" type="number" step="0.01" />
+                            </div>
+                            <span asp-validation-for="Precio" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="Stock" class="form-label fw-bold"></label>
+                            <input asp-for="Stock" class="form-control" type="number" min="0" />
+                            <span asp-validation-for="Stock" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label asp-for="ImagenUrl" class="form-label fw-bold">URL de Imagen:</label>
+                            <input asp-for="ImagenUrl" class="form-control" />
+                            <span asp-validation-for="ImagenUrl" class="text-danger small"></span>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label asp-for="Descripcion" class="form-label fw-bold"></label>
+                            <textarea asp-for="Descripcion" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Descripcion" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top d-flex gap-2">
+                        <button type="submit" class="btn btn-warning px-4 fw-bold">
+                            <i class="bi bi-check2 me-1"></i> Actualizar Producto
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary px-4">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
