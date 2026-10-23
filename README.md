@@ -126,3 +126,6 @@ makeup_inventory/
 | 4 | Docker y propuesta de nube | Completado | `docker/`, `docs/Propuesta_Despliegue_Azure.md` |
 | 5 | Base de datos | Completado | `database/MakeupInventoryDB.sql` |
 | 6 | Pruebas de funcionamiento | Completado: 25 casos
+| 7 | Documentación | Completado | https://docs.google.com/document/d/1N-EdFZNFU6brF89RCi6RqmgIpK-jpugL/edit?usp=sharing&ouid=117926382059529835393&rtpof=true&sd=true · https://docs.google.com/document/d/1dBVuKxUu3JkkNVuYos52cGMfcRIEhdEy/edit?usp=sharing&ouid=117926382059529835393&rtpof=true&sd=true · https://docs.google.com/document/d/1iECDJ79-IVO8ZxZGJ9YQTH-GR7CnKHCo/edit?usp=drive_link&ouid=117926382059529835393&rtpof=true&sd=true · https://docs.google.com/document/d/11pyYItozwNpEqmdJX90ZMDOl7GclZXAy/edit?usp=drive_link&ouid=117926382059529835393&rtpof=true&sd=true |
+| 8 | Video de evidencia | https://drive.google.com/file/d/128xuCMkgB5GcA1dI3z2GO4bUok4JxWDl/view?usp=sharing |
+| 9 | Repositorio | Completado | Este repositorio |
